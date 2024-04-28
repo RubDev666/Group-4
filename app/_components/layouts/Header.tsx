@@ -52,7 +52,9 @@ export default function Header() {
         //si no hay usuario igual detener la carga de la animacion
         setTimeout(() => {
             if (!usuario) setLoading(false);
-        }, 3000)
+        }, 3000);
+
+        console.log(usuario);
     }, [usuario])
 
     useEffect(() => {

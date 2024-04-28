@@ -28,7 +28,7 @@ class Firebase {
 
     //registrar usuario
     async registrar(data: RegisterType) {
-        if(!this.auth || !this.db) throw new Error('Fallo la conexion, intentelo mas tarde*');
+        if (!this.auth || !this.db) throw new Error('Fallo la conexion, intentelo mas tarde*');
 
         const { name, email, password } = data;
 
@@ -38,9 +38,9 @@ class Firebase {
 
         const res = await createUserWithEmailAndPassword(this.auth, email, password);
 
-        if(this.auth.currentUser) await updateProfile(this.auth.currentUser, { displayName: name.replace(/ /g, ""), photoURL: getRandomColor() });
+        if (this.auth.currentUser) await updateProfile(this.auth.currentUser, { displayName: name.replace(/ /g, ""), photoURL: getRandomColor() });
 
-        if(this.auth.currentUser) sendEmailVerification(this.auth.currentUser)
+        if (this.auth.currentUser) sendEmailVerification(this.auth.currentUser)
             .then(() => {
                 // Email verification sent!
                 // ...
@@ -58,17 +58,17 @@ class Firebase {
     }
 
     cerrarSesion = async () => {
-        if(this.auth) await signOut(this.auth);
+        if (this.auth) await signOut(this.auth);
     }
 
     login = async (datos: LoginType) => {
-        if(this.auth) await signInWithEmailAndPassword(this.auth, datos.email, datos.password);
+        if (this.auth) await signInWithEmailAndPassword(this.auth, datos.email, datos.password);
     }
 
     async updateProfileImg(img: File, user: User) {
-        if(!this.auth) return;
-        if(!this.db) return;
-        if(!this.auth.currentUser) return;
+        if (!this.auth) return;
+        if (!this.db) return;
+        if (!this.auth.currentUser) return;
 
         //obtener url y actualizar el perfil del usuario
         const urlImg = await this.uploadImg(`images/profiles/${user.uid}`, img)
@@ -83,7 +83,7 @@ class Firebase {
     }
 
     async updateUserName(name: string, usuario: User) {
-        if(!this.auth || !this.db) throw new Error('Fallo la conexion, intentelo mas tarde*');
+        if (!this.auth || !this.db) throw new Error('Fallo la conexion, intentelo mas tarde*');
 
         const nameUserVerified = await this.getData('usuarios', name);
         if (nameUserVerified) throw new Error('El nombre de usuario ya esta en uso*');
@@ -109,7 +109,7 @@ class Firebase {
         }
 
         //actualizar el nombre del perfil
-        if(this.auth.currentUser) await updateProfile(this.auth.currentUser, { displayName: name });
+        if (this.auth.currentUser) await updateProfile(this.auth.currentUser, { displayName: name });
     }
 
     async createPost({ title, description, imgFile, user }: CreatePostArg): Promise<string> {
@@ -130,14 +130,14 @@ class Firebase {
             comments: []
         }
 
-        if(this.db) await setDoc(doc(this.db, "posts", idPost), newPost);
+        if (this.db) await setDoc(doc(this.db, "posts", idPost), newPost);
 
         return idPost;
     }
 
     //guardar la imagen para post o foto de perfil en la base de datos
     async uploadImg(ubicacion: string, img: File): Promise<string> {
-        if(!this.storage) throw new Error('Fallo la conexion, intentelo mas tarde*');
+        if (!this.storage) throw new Error('Fallo la conexion, intentelo mas tarde*');
 
         const storageRef = ref(this.storage, ubicacion);
         await uploadBytes(storageRef, img);
@@ -150,7 +150,7 @@ class Firebase {
 
     //extraer un solo dato en especifico de la base de datos, ya sea un post o un usuario en especifico.
     async getData(ref: string, idData: string): Promise<DocumentData | null> {
-        if(!this.db) return null;
+        if (!this.db) return null;
 
         const docRef = doc(this.db, ref, idData);
         const docSnap = await getDoc(docRef);
@@ -167,7 +167,7 @@ class Firebase {
     }
 
     async getAllPosts(): Promise<AllPostsType[] | []> {
-        if(!this.db) return [];
+        if (!this.db) return [];
 
         const refPosts = query(collection(this.db, "posts"), orderBy('date', 'desc'));
         const resPosts = await getDocs(refPosts);
@@ -194,7 +194,7 @@ class Firebase {
     }
 
     async getAllUsers(): Promise<DocumentData[] | []> {
-        if(!this.db) return [];
+        if (!this.db) return [];
 
         const refUsers = query(collection(this.db, 'usuarios'));
         const resUsers = await getDocs(refUsers);
@@ -210,11 +210,11 @@ class Firebase {
     //es mas facil reemplazar todo el arreglo que buscar en especifico...
     //tambien actualizamos los likes del post
     async updatePost({ idPost, key, newData }: updatePostParams) {
-        if(this.db) await updateDoc(doc(this.db, "posts", idPost), { [key]: newData });
+        if (this.db) await updateDoc(doc(this.db, "posts", idPost), { [key]: newData });
     }
 
-    async editPost({title, description, imgUrl, idPost, deleteImg}: EditPost) {
-        if(!this.db || !this.storage) return;
+    async editPost({ title, description, imgUrl, idPost, deleteImg }: EditPost) {
+        if (!this.db || !this.storage) return;
 
         let img: string | null = null;
 
@@ -222,7 +222,7 @@ class Firebase {
         if (typeof imgUrl !== 'string' && imgUrl !== null) img = await this.uploadImg(`images/post/${idPost}`, imgUrl);
 
         //borrar imagen de un post
-        if(deleteImg) await deleteObject(ref(this.storage, `images/post/${idPost}`));
+        if (deleteImg) await deleteObject(ref(this.storage, `images/post/${idPost}`));
 
         await updateDoc(doc(this.db, "posts", idPost), {
             title,
