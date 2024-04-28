@@ -1,7 +1,7 @@
 import firebaseConfig from './config';
 
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut, User, Auth } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut, User, Auth, sendEmailVerification } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, FirebaseStorage } from 'firebase/storage';
 import { getFirestore, collection, getDocs, orderBy, query, deleteDoc, doc, getDoc, updateDoc, DocumentData, setDoc, Firestore } from 'firebase/firestore';
 
@@ -40,12 +40,12 @@ class Firebase {
 
         if(this.auth.currentUser) await updateProfile(this.auth.currentUser, { displayName: name.replace(/ /g, ""), photoURL: getRandomColor() });
 
-        /*sendEmailVerification(this.auth.currentUser)
+        if(this.auth.currentUser) sendEmailVerification(this.auth.currentUser)
             .then(() => {
                 // Email verification sent!
                 // ...
                 console.log('email enviado');
-            });*/
+            });
 
         const newUser: UserDbType = {
             uid: res.user.uid,
