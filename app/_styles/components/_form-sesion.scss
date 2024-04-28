@@ -1,0 +1,151 @@
+@use '../globals/color-vars' as color;
+
+.login-modal.active {
+    z-index: 950;
+    top: 0;
+    display: flex;
+}
+
+.form-container {
+    height: auto;
+    border-radius: 20px;
+    margin: auto 7%;
+    padding: 20px 5%;
+    font-size: 16px;
+
+    .btn-close {
+        font-size: 30px;
+        border-radius: 100%;
+        padding: 4px;
+        right: 10%;
+        top: 20px;
+
+        .icon {
+            font-size: 30px;
+        }
+    }
+
+    h3 {
+        font-size: 1.5em;
+    }
+
+    form {
+        padding: 20px 0;
+
+        fieldset {
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        div.bg-input {
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-bottom: 30px;
+
+            label {
+                top: 10px;
+                font-size: 1em;
+                opacity: .6;
+                transition: all .2s ease-in-out;
+
+                span {
+                    color: color.$primary;
+                }
+
+                &.active {
+                    opacity: 0;
+                }
+            }
+
+            input {
+                background-color: transparent;
+                z-index: 100;
+            }
+
+            .error-input {
+                color: color.$error-color;
+                position: absolute;
+                right: 20px;
+                top: -18px;
+                font-size: .85em;
+                font-weight: 600;
+            }
+        }
+
+        p {
+            margin: 0 0 40px;
+            font-size: 1em;
+
+            span {
+                color: color.$primary;
+                font-weight: 600;
+                text-decoration: underline;
+            }
+        }
+
+        .action-container {
+            .error-submit {
+                color: color.$error-color;
+                font-size: .9em;
+                font-weight: 600;
+                top: -22px;
+            }
+
+            .btn-submit {
+                background-color: color.$primary;
+                color: color.$text-color-dark;
+                border-radius: 25px;
+                padding: 10px 20px;
+                text-align: center;
+                font-size: 1.1em;
+                font-weight: 600;
+    
+                &:hover {
+                    background-color: color.$primary-hover;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (min-width: 400px) {
+    .form-container {
+        form {
+            div.bg-input {
+                label {
+                    &.active {
+                        top: -18px;
+                        font-size: .8em;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media screen and (min-width: 480px) {
+    .form-container {
+        form {
+            div.bg-input {
+                label {
+                    &.active {
+                        opacity: 1;
+                    }
+                }
+
+                .error-input {
+                    top: -18px;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (min-width: 640px) {
+    .form-container {
+        max-width: 600px;
+        margin: auto;
+        font-size: 18px;
+    }
+}

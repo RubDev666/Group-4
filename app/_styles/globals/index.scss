@@ -1,0 +1,76 @@
+@forward 'normalize';
+@forward 'typography';
+@forward 'mixins';
+@forward 'utilities';
+@forward 'layout';
+
+@use 'color-vars' as color;
+
+* {
+    box-sizing: border-box;
+
+    &::selection {
+        background-color: color.$primary;
+        color: color.$text-color-dark;
+    }
+}
+
+a {
+    text-decoration: none;
+}
+
+input,
+button,
+hr {
+    outline: none;
+    border: none;
+}
+
+body {
+    background-color: color.$body-color;
+    color: color.$text-color;
+}
+
+[data-theme='dark'] body {
+    background-color: color.$body-color-dark;
+    color: color.$text-color-dark;
+}
+
+hr {
+    width: 100%;
+    min-height: 1px;
+    background-color: color.$border-line;
+}
+
+[data-theme='dark'] hr{
+    background-color: color.$border-line-dark;
+}
+
+.bg-modal.active {
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    position: fixed;
+    left: 0;
+}
+
+@media screen and (min-width: 720px) {
+    [data-theme='dark'] main {
+        border-right: solid 1px color.$border-line-dark;       
+    }
+
+    main {
+        border-right: solid 1px color.$border-line;          
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    [data-theme='dark'] main {
+        border-left: solid 1px color.$border-line-dark;
+        border-right: solid 1px color.$border-line-dark;       
+    }
+
+    main {
+        border-left: solid 1px color.$border-line;
+        border-right: solid 1px color.$border-line;          
+    }
+}

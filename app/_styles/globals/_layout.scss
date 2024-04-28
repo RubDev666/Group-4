@@ -1,0 +1,55 @@
+/*----------- AQUI SOLO SE VA A DEFINIR EL LAYOUT, LOS COMPOARTAMIENTOS DE CADA CONTENEDOR, COMO MEDIDAS, ESPACIOS, Y ETC, ESTARAN EN SUS PROPIAS HOJAS DE ESTILO ------ */
+
+.grid-layout {
+    position: relative;
+    display: grid;
+    margin-top: 60px;
+}
+
+main {
+    padding: 20px 4%;
+    overflow: hidden;
+}
+
+@media screen and (min-width: 720px) {
+    .grid-layout {
+        grid-template-areas: 
+            'hero hero'
+            'page aside-r'
+        ;
+        grid-template-columns: auto 250px;
+
+        .img-hero {
+            grid-area: hero;
+        }
+
+        main {
+            grid-area: page;
+        }
+
+        aside.right {
+            grid-area: aside-r;
+        }
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .grid-layout {
+        grid-template-areas: 
+            'aside-l hero hero'
+            'aside-l page aside-r'
+        ;
+        grid-template-columns: 250px auto 250px;
+
+        aside.left {
+            grid-area: aside-l;
+        }
+    }
+}
+
+@media screen and (min-width: 1320px) {
+    .grid-layout {
+        margin: 60px 7% 0;
+        grid-template-columns: 300px auto 300px;
+    }
+}

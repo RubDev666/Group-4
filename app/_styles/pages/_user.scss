@@ -1,0 +1,23 @@
+.user-main-container {
+    .img-name-container {
+        gap: 20px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+
+        img {
+            border-radius: 100%;
+        }
+
+        h4 {
+            margin: 0;
+            align-self: flex-end;
+            font-size: 25px;
+        }
+    }
+
+    h5 {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 25px;
+    }
+}

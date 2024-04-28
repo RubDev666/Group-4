@@ -1,0 +1,69 @@
+@use 'color-vars' as color;
+
+@mixin logo($size, $left) {
+    color: color.$primary;
+    letter-spacing: -3px;
+    font-size: $size;
+
+    span {
+        color: #fff;
+        position: relative;
+
+        &::before {
+            content: '';
+            height: $size;
+            width: $size;
+            background-color: color.$primary;
+            position: absolute;
+            z-index: -1;
+            transform: rotate(27deg);
+            left: $left;
+        }
+    }
+}
+
+@mixin btnPrimary() {
+    background-color: color.$primary;
+    border-radius: 20px;
+    color: color.$text-color-dark;
+
+    &:hover {
+        background-color: color.$primary-hover;
+    }
+}
+
+@mixin headerArticle($user-size, $time-size) {
+    gap: 10px;
+
+    .user {
+        gap: 6px;
+        font-weight: 500;
+        font-size: $user-size;
+
+        img {
+            border-radius: 100%;
+        }
+    }
+
+    .time {
+        margin: 0 0 0 15px;
+
+        @media screen and (min-width: 480px) {
+            margin: 0 0 0 20px;
+        }
+
+        font-size: $time-size;
+        font-weight: 400;
+
+        &::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            position: absolute;
+            top: 5px;
+            left: -10px;
+            background-color: color.$primary;
+            border-radius: 100%;
+        }
+    }
+}

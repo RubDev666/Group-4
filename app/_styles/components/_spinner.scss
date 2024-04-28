@@ -1,0 +1,49 @@
+@use '../globals/color-vars' as color;
+
+.spinner-container {
+    *height: 100%;
+    *height: calc(100vh - 60px);
+    margin-top: 200px;
+
+    gap: 40px;
+
+    $spinner-size: 160px;
+    $secondary-color: #b1b1b1;
+
+    .loader {
+        width: $spinner-size;
+        height: $spinner-size;
+        display: inline-block;
+        position: relative;
+    }
+
+    .loader::after,
+    .loader::before {
+        content: '';
+        box-sizing: border-box;
+        width: $spinner-size;
+        height: $spinner-size;
+        border: 6px solid $secondary-color;
+        background-color: $secondary-color;
+        position: absolute;
+        left: 0;
+        top: 0;
+        animation: rotation 2s ease-in-out infinite alternate;
+    }
+
+    .loader::after {
+        border-color: color.$primary;
+        background-color: color.$primary;
+        animation-direction: alternate-reverse;
+    }
+
+    @keyframes rotation {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+}

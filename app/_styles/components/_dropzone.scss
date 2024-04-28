@@ -1,0 +1,39 @@
+@use '../globals/color-vars' as color;
+
+$height-dropzone: 250px;
+
+.dropzone-container {
+    min-height: $height-dropzone;
+
+    .preview-img-container {
+        height: calc(100px + 30vw);
+        max-height: $height-dropzone;
+        min-height: $height-dropzone;
+
+        img {
+            width: auto;
+            object-fit: contain;
+            height: 100%;
+            position: absolute;
+        }
+    }
+
+    .dropzone {
+        text-align: center;
+        min-height: $height-dropzone;
+        padding: 20px;
+        border: dashed 1px color.$primary;
+
+        .instructions-container {
+            color: #5f5f5f;
+
+            p {
+                margin: 0 0 20px;
+            }
+
+            .icon {
+                font-size: 40px;
+            }
+        }
+    }
+}

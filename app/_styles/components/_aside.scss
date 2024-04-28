@@ -1,0 +1,87 @@
+@use '../globals/color-vars' as color;
+
+/*------- estilos globales para ambos aside ----- */
+aside {
+    width: 250px;
+    height: calc(100vh - 60px);
+    top: 60px;
+    padding: 20px;
+    align-items: flex-start;
+    flex-direction: column;
+    overflow-y: scroll;
+
+    .titulo-acordeon {
+        letter-spacing: 5px;
+        text-transform: uppercase;
+    }
+
+    a {
+        font-size: 16px;
+        font-weight: 400;
+        gap: 20px;
+        padding: 7px 20px;
+        border-radius: 8px;
+    }
+
+    .img-profile {
+        border-radius: 100%;
+    }
+
+    .btn-view {
+        padding: 5px 15px;
+        border-radius: 25px;
+        font-weight: 300;
+        margin-top: 15px;
+    }
+}
+
+aside.left {
+    position: fixed;
+    z-index: 800;
+
+    p {
+        font-weight: 300;
+        font-size: 13px;
+        margin-top: 20px;
+
+        span {
+            color: color.$primary;
+            font-weight: 600;
+        }
+    }
+}
+
+.nav-modal {
+    z-index: 750;
+    top: 60px;
+}
+
+aside.right {
+    padding-top: 10px;
+    position: sticky;
+}
+
+/*------------------- MATERIAL UI ACCORDEON COMPONENT ------------ */
+.icon-expanded {
+    color: color.$primary;
+}
+
+@media screen and (min-width: 720px) {
+    aside.right {
+        display: flex;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    aside.left {
+        display: flex;
+        position: sticky;
+        z-index: 0;
+    }
+}
+
+@media screen and (min-width: 1320px) {
+    aside {
+        width: 100%;
+    }
+}

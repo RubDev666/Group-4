@@ -1,0 +1,35 @@
+@use '../globals/mixins' as mixin;
+
+.not-found-container {
+    .error-title {
+        @include mixin.logo(62px, -3px);
+
+        padding: 0 30%;
+        margin: 45px 0;
+    }
+
+    p {
+        font-size: 25px;
+        margin: 0;
+    }
+}
+
+@media screen and (min-width: 480px) {
+    .not-found-container {
+        .error-title {    
+            padding: 0 10%;
+        }
+    }
+}
+
+@media screen and (min-width: 1500px) {
+    .not-found-container {
+        .error-title {
+            @include mixin.logo(82px, -3px);
+        }
+    
+        p {
+            font-size: 35px;
+        }
+    }
+}
