@@ -5,7 +5,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, up
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, FirebaseStorage } from 'firebase/storage';
 import { getFirestore, collection, getDocs, orderBy, query, deleteDoc, doc, getDoc, updateDoc, DocumentData, setDoc, Firestore } from 'firebase/firestore';
 
-import { RegisterType, UserDbType, LoginType, PostTypes, CreatePostArg, AllPostsType, updatePostParams, EditPost } from '../_types';
+import { RegisterType, UserDbType, LoginType, PostTypes, CreatePostArg, AllPostsType, updatePostParams, EditPost, PopularUsers } from '../_types';
 import getDateRegister from '../_utilities/getDateRegister';
 import getRandomColor from '../_utilities/getRandomColor';
 
@@ -53,8 +53,18 @@ class Firebase {
             photoURL: res.user.photoURL,
             dateRegister: getDateRegister()
         }
+        
+        const popularData: PopularUsers = {
+            uid: res.user.uid,
+            totalCommentsReceived: 0,
+            totalLikesReceived: 0
+        }
 
-        if (res.user.displayName) await setDoc(doc(this.db, "usuarios", res.user.displayName), newUser);
+        if (res.user.displayName) {
+            await setDoc(doc(this.db, "usuarios", res.user.displayName), newUser);
+
+            await setDoc(doc(this.db, 'popularUsers', res.user.uid), popularData)
+        }
     }
 
     cerrarSesion = async () => {
@@ -209,8 +219,25 @@ class Firebase {
     //agrega o actualiza comentarios o respuestas a la vez
     //es mas facil reemplazar todo el arreglo que buscar en especifico...
     //tambien actualizamos los likes del post
-    async updatePost({ idPost, key, newData }: updatePostParams) {
-        if (this.db) await updateDoc(doc(this.db, "posts", idPost), { [key]: newData });
+    async updatePost({ idPost, key, newData, currentData, idCreator }: updatePostParams) {
+        if (!this.db) return;
+
+        if (key === 'likes') {
+            const creator = await this.getData('popularUsers', idCreator);
+            let newTotal = 0;
+
+            if (creator) {
+                const currentTotalLikes = creator.totalLikesReceived;
+
+                if (currentTotalLikes > 0) newTotal = (currentTotalLikes - currentData) + newData.length;
+
+                if (currentTotalLikes === 0) newTotal = currentTotalLikes + newData.length;
+
+                await updateDoc(doc(this.db, "popularUsers", idCreator), { totalLikesReceived: newTotal });
+            }
+        }
+
+        await updateDoc(doc(this.db, "posts", idPost), { [key]: newData });
     }
 
     async editPost({ title, description, imgUrl, idPost, deleteImg }: EditPost) {
@@ -233,6 +260,25 @@ class Firebase {
 
     deletePost = async (idPost: string) => {
         if (this.db) await deleteDoc(doc(this.db, "posts", idPost));
+    }
+
+    async getPopularUsers(): Promise<DocumentData[]> {
+        if(!this.db) return [];
+
+        const ref = query(collection(this.db, 'popularUsers'));
+        const getData = await getDocs(ref);
+
+        const usersDB = await this.getAllUsers();
+
+        let popularUsers: DocumentData[] = [];
+
+        getData.forEach((data) => {
+            for(let user of usersDB) {
+                if(user.uid === data.data().uid) popularUsers = [...popularUsers, user];
+            }
+        })
+
+        return popularUsers;
     }
 }
 

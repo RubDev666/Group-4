@@ -1,5 +1,10 @@
 @use '../globals/color-vars' as color;
 
+@mixin userLink-container() {
+    gap: 20px;
+    padding: 7px 20px;
+}
+
 /*------- estilos globales para ambos aside ----- */
 aside {
     width: 250px;
@@ -18,9 +23,9 @@ aside {
     a {
         font-size: 16px;
         font-weight: 400;
-        gap: 20px;
-        padding: 7px 20px;
         border-radius: 8px;
+
+        @include userLink-container();
     }
 
     .img-profile {
@@ -59,6 +64,10 @@ aside.left {
 aside.right {
     padding-top: 10px;
     position: sticky;
+
+    .skeleton-user {
+        @include userLink-container();
+    }
 }
 
 /*------------------- MATERIAL UI ACCORDEON COMPONENT ------------ */

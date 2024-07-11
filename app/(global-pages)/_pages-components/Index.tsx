@@ -9,7 +9,19 @@ import { AllPostsType } from '@/app/_types';
 import { GlobalContext } from '../providers';
 
 export default function Index() {
-    const {allPosts} = useContext(GlobalContext);
+    const { allPosts, loading } = useContext(GlobalContext);
+
+    if (!allPosts) return (
+        <div className="main-container w-full">
+            <p>error....</p>
+        </div>
+    )
+
+    if (loading) return (
+        <div className="main-container w-full">
+            <Spinner />
+        </div>
+    )
 
     return (
         <div className="main-container w-full">
@@ -24,7 +36,7 @@ export default function Index() {
                     ))}
                 </>
             ) : (
-                <Spinner />
+                <p>se el primero en publicar...</p>
             )}
         </div>
     );

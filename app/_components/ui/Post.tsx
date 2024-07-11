@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -19,6 +19,8 @@ import PostOptions from './PostOptions';
 import { GlobalContext } from '@/app/(global-pages)/providers';
 
 export default function Post({ postData, creador }: { postData: DocumentData, creador: DocumentData }) {
+    const [currentLikes, setCurrentLikes] = useState<number>(postData.likes.length);
+
     const path = usePathname();
     const router = useRouter();
     const usuario = useAutenticacion();
@@ -34,11 +36,7 @@ export default function Post({ postData, creador }: { postData: DocumentData, cr
     }
 
     const likeToggle = async () => {
-        if (!usuario) {
-            setFormModal(true);
-
-            return;
-        }
+        if (!usuario) return setFormModal(true);
 
         const currentData = postData.likes;
 
@@ -52,18 +50,22 @@ export default function Post({ postData, creador }: { postData: DocumentData, cr
 
         try {
             postData.likes = newLikes;
+            setCurrentLikes(newLikes.length);
 
             await firebase.updatePost({
                 idPost: postData.id,
+                idCreator: postData.idUser,
+                currentData: currentData.length,
                 key: 'likes',
                 newData: newLikes
             });
 
-            router.refresh();
+            //router.refresh();
         } catch (error) {
             postData.likes = currentData;
+            setCurrentLikes(currentData.length);
 
-            router.refresh();
+            //router.refresh();
         }
     }
 
@@ -80,7 +82,7 @@ export default function Post({ postData, creador }: { postData: DocumentData, cr
 
                 <div className="header-post relative flex justify-between">
                     <div className='flex info-creator'>
-                        <Link href={`/u/${creador.displayName}`} className="user text-color all-center">
+                        <Link href={`/u/${creador.displayName}`} className="user text-color flex align-center">
                             <AvatarImg
                                 size={30}
                                 fontSize={20}
@@ -130,7 +132,7 @@ export default function Post({ postData, creador }: { postData: DocumentData, cr
                             <FavoriteBorder className='icon' />
                         )}
 
-                        <span>{postData.likes.length.toString()}</span>
+                        <span>{currentLikes}</span>
                     </div>
 
                     <div className="relative comment all-center pointer bg-hover-2" onClick={redirectPost}>

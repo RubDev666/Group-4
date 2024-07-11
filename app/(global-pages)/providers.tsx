@@ -14,19 +14,33 @@ export const GlobalContext = createContext<any>({});
 export function Providers({ children }: { children: React.ReactNode }) {
     const [navModal, setNavModal] = useState(false);
     const [formModal, setFormModal] = useState(false);
-    const [allPosts, setAllPosts] = useState<AllPostsType[] | []>([]);
-    const [allUsers, setAllUsers] = useState<DocumentData[] | []>([]);
+    const [loadingData, setLoadingData] = useState(true);
+    const [loadingPopular, setLoadingPopular] = useState(true);
+
+    const [popularUsers, setPopularUsers] = useState<DocumentData[]>([]);
+    const [allPosts, setAllPosts] = useState<AllPostsType[]>([]);
+    const [allUsers, setAllUsers] = useState<DocumentData[]>([]);
 
     useEffect(() => {
         getPosts();
+
+        getPop();
     }, [])
+
+    const getPop = async () => {
+        const res = await firebase.getPopularUsers();
+
+        setPopularUsers(res);
+        setLoadingPopular(false);
+    }
 
     const getPosts = async () => {
         const res = await firebase.getAllPosts();
         const users = await firebase.getAllUsers();
-
-        setAllUsers(users);
+        
         setAllPosts(res);
+        setAllUsers(users);
+        setLoadingData(false);
     }
 
     useEffect(() => {
@@ -71,6 +85,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     allPosts,
                     allUsers,
                     getPosts,
+                    loading: loadingData,
+                    popularUsers,
+                    loadingPopular
                 }}
             >
                 {children}

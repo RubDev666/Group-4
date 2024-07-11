@@ -16,7 +16,8 @@ export type RegisterType = {
     name: string,
     email: string,
     password: string,
-    confirmPassword: string
+    confirmPassword: string,
+    
 }
 
 export type UserDbType = {
@@ -24,6 +25,12 @@ export type UserDbType = {
     displayName: string | null,
     photoURL: string | null,
     dateRegister: string
+}
+
+export type PopularUsers = {
+    uid: string;
+    totalLikesReceived: number;
+    totalCommentsReceived: number;
 }
 
 export type LoginType = {
@@ -75,7 +82,9 @@ export type AllPostsType = {
 
 export type updatePostParams = {
     idPost: string;
+    idCreator: string;
     key: string;
+    currentData: number;
     newData: CommentTypes[] | string[] | [];
 }
 
