@@ -12,7 +12,7 @@ import { GlobalContext } from "@/app/(global-pages)/providers";
 
 import { DocumentData } from "firebase/firestore";
 
-import { AvatarImg, Skeleton } from "../ui";
+import { AvatarImg, SkeletonUser } from "../ui";
 
 export default function AsideRight() {
     const { popularUsers, loadingPopular } = useContext(GlobalContext);
@@ -32,75 +32,11 @@ export default function AsideRight() {
                 <AccordionDetails className='acordeon-items-container' sx={{ padding: '0' }}>
                     {loadingPopular && (
                         <>
-                            <div className="flex skeleton-user">
-                                <Skeleton
-                                    variant="circular"
-                                    width={30}
-                                    height={30}
-                                />
-
-                                <Skeleton
-                                    variant="rectangular"
-                                    width={100}
-                                    height={30}
-                                />
-                            </div>
-
-                            <div className="flex skeleton-user">
-                                <Skeleton
-                                    variant="circular"
-                                    width={30}
-                                    height={30}
-                                />
-
-                                <Skeleton
-                                    variant="rectangular"
-                                    width={100}
-                                    height={30}
-                                />
-                            </div>
-
-                            <div className="flex skeleton-user">
-                                <Skeleton
-                                    variant="circular"
-                                    width={30}
-                                    height={30}
-                                />
-
-                                <Skeleton
-                                    variant="rectangular"
-                                    width={100}
-                                    height={30}
-                                />
-                            </div>
-
-                            <div className="flex skeleton-user">
-                                <Skeleton
-                                    variant="circular"
-                                    width={30}
-                                    height={30}
-                                />
-
-                                <Skeleton
-                                    variant="rectangular"
-                                    width={100}
-                                    height={30}
-                                />
-                            </div>
-
-                            <div className="flex skeleton-user">
-                                <Skeleton
-                                    variant="circular"
-                                    width={30}
-                                    height={30}
-                                />
-
-                                <Skeleton
-                                    variant="rectangular"
-                                    width={100}
-                                    height={30}
-                                />
-                            </div>
+                            <SkeletonUser />
+                            <SkeletonUser />
+                            <SkeletonUser />
+                            <SkeletonUser />
+                            <SkeletonUser />
                         </>
                     )}
 

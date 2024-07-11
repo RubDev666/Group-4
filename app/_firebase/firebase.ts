@@ -53,7 +53,7 @@ class Firebase {
             photoURL: res.user.photoURL,
             dateRegister: getDateRegister()
         }
-        
+
         const popularData: PopularUsers = {
             uid: res.user.uid,
             totalCommentsReceived: 0,
@@ -222,7 +222,7 @@ class Firebase {
     async updatePost({ idPost, key, newData, currentData, idCreator }: updatePostParams) {
         if (!this.db) return;
 
-        if (key === 'likes') {
+        if ((key === 'likes') && (currentData !== undefined && idCreator !== undefined)) {
             const creator = await this.getData('popularUsers', idCreator);
             let newTotal = 0;
 
@@ -263,20 +263,26 @@ class Firebase {
     }
 
     async getPopularUsers(): Promise<DocumentData[]> {
-        if(!this.db) return [];
+        if (!this.db) return [];
 
         const ref = query(collection(this.db, 'popularUsers'));
         const getData = await getDocs(ref);
 
         const usersDB = await this.getAllUsers();
 
+        let populars: DocumentData[] = [];
+        getData.forEach((data) => populars = [...populars, data.data()]);
+        populars.sort((a, b) => b.totalLikesReceived - a.totalLikesReceived);
+
         let popularUsers: DocumentData[] = [];
 
-        getData.forEach((data) => {
-            for(let user of usersDB) {
-                if(user.uid === data.data().uid) popularUsers = [...popularUsers, user];
+        for (let i = 0; i < 5; i++) {
+            if (!populars[i]) break;
+
+            for (let user of usersDB) {
+                if (user.uid === populars[i].uid) popularUsers = [...popularUsers, user];
             }
-        })
+        }
 
         return popularUsers;
     }
