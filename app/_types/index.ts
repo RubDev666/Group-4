@@ -82,9 +82,9 @@ export type AllPostsType = {
 
 export type updatePostParams = {
     idPost: string;
-    idCreator: string;
+    idCreator?: string;
     key: string;
-    currentData: number;
+    currentData?: number;
     newData: CommentTypes[] | string[] | [];
 }
 

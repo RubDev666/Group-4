@@ -52,6 +52,8 @@ export default function Post({ postData, creador }: { postData: DocumentData, cr
             postData.likes = newLikes;
             setCurrentLikes(newLikes.length);
 
+            if (usuario.uid !== postData.idUser) await firebase.handleRecentActivity(usuario.uid, postData.idUser);
+
             await firebase.updatePost({
                 idPost: postData.id,
                 idCreator: postData.idUser,

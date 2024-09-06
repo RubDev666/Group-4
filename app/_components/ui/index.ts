@@ -7,6 +7,7 @@ import Skeleton from "./Skeleton";
 import UserOptions from "./UserOptions";
 import AvatarImg from "./AvatarImg";
 import CommentOptions from "./CommentOptions";
+import SkeletonUser from "./SkeletonUser";
 
 export {
     Post,
@@ -17,5 +18,6 @@ export {
     Skeleton,
     UserOptions,
     AvatarImg,
-    CommentOptions
+    CommentOptions,
+    SkeletonUser
 }
