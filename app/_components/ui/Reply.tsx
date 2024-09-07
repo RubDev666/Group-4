@@ -75,6 +75,8 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPop
         respuesta.likes = newLikes; //por eso modifico directamente este... por que modifica todo el "currentPost" del state de todas formas aunque copie o cree un nuevo arreglo en otra variable...
 
         try {
+            if (usuario.uid !== currentPost.idUser) await firebase.handleRecentActivity(usuario.uid, currentPost.idUser);
+
             await firebase.updatePost({
                 idPost: currentPost.id,
                 key: 'comments',
@@ -99,12 +101,16 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPop
             return;
         }
 
+        if(!usuario) return;
+
         if (comentarioEdit === '') return;
 
         const currentComment = respuesta.comment;
 
         try {
             currentPost.comments[indexComment].respuesta = comentarioEdit;
+
+            if (usuario.uid !== currentPost.idUser) await firebase.handleRecentActivity(usuario.uid, currentPost.idUser);
 
             await firebase.updatePost({
                 idPost: currentPost.id,

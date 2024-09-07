@@ -33,6 +33,8 @@ export default function FormComment({ post, setFormComment, comentario, setComen
         if (!usuario) return;
 
         try {
+            if (usuario.uid !== post.idUser) await firebase.handleRecentActivity(usuario.uid, post.idUser);
+
             if (!isReplyForm) {
                 currentData = post.comments;
 

@@ -19,6 +19,7 @@ import {
     LightMode, 
     DarkMode,
 } from "@mui/icons-material"; 
+import firebase from "@/app/_firebase/firebase";
 
 export default function Header() {
     const { navModal, setNavModal, setFormModal, getPosts } = useContext(GlobalContext);
@@ -47,7 +48,11 @@ export default function Header() {
 
     //obtener el usuario actual autenticado
     useEffect(() => {
-        if (usuario) setLoading(false);
+        if (usuario) {
+            handlePopular(usuario.uid);
+
+            setLoading(false);
+        }
 
         //si no hay usuario igual detener la carga de la animacion
         setTimeout(() => {
@@ -60,6 +65,12 @@ export default function Header() {
     useEffect(() => {
         setMounted(true);
     }, []); 
+
+    const handlePopular = async (uid: string) => {
+        const getPopulars = await firebase.getData('popularUsers', uid);
+
+        if(!getPopulars) await firebase.createPopularUser(uid);
+    }
 
     const toggleMenu = () => setNavModal(!navModal);
 

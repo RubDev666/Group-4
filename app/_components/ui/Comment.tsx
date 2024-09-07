@@ -76,6 +76,8 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
         try {
             currentPost.comments[indexComment].likes = newLikes;
 
+            if (usuario.uid !== currentPost.idUser) await firebase.handleRecentActivity(usuario.uid, currentPost.idUser);
+
             await firebase.updatePost({
                 idPost: currentPost.id,
                 key: 'comments',
@@ -99,12 +101,15 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
             return;
         }
 
+        if(!usuario) return;
         if(comentarioEdit === '') return;
 
         const currentComment = comentario.comment;
 
         try {
             currentPost.comments[indexComment].comment = comentarioEdit;
+
+            if (usuario.uid !== currentPost.idUser) await firebase.handleRecentActivity(usuario.uid, currentPost.idUser);
 
             await firebase.updatePost({
                 idPost: currentPost.id,

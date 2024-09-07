@@ -1,7 +1,7 @@
 import firebaseConfig from './config';
 
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut, User, Auth, sendEmailVerification } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut, User, Auth, sendEmailVerification, onAuthStateChanged } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, FirebaseStorage } from 'firebase/storage';
 import { getFirestore, collection, getDocs, orderBy, query, deleteDoc, doc, getDoc, updateDoc, DocumentData, setDoc, Firestore } from 'firebase/firestore';
 
@@ -54,16 +54,16 @@ class Firebase {
             dateRegister: getDateRegister()
         }
         
-        const popularData: PopularUsers = {
+        /*const popularData: PopularUsers = {
             uid: res.user.uid,
             totalCommentsReceived: 0,
             totalLikesReceived: 0
-        }
+        }*/
 
         if (res.user.displayName) {
             await setDoc(doc(this.db, "usuarios", res.user.displayName), newUser);
 
-            await setDoc(doc(this.db, 'popularUsers', res.user.uid), popularData)
+            //await setDoc(doc(this.db, 'popularUsers', res.user.uid), popularData)
         }
     }
 
@@ -262,6 +262,24 @@ class Firebase {
         if (this.db) await deleteDoc(doc(this.db, "posts", idPost));
     }
 
+    async createPopularUser(uid: string) {
+        if (!this.db) return;
+
+        const allPosts = await this.getAllPosts();
+
+        const getTotalLikes = allPosts
+            .filter(data => data.usuario.uid === uid)
+            .reduce((total, data) => data.posts.likes.length + total, 0)
+
+        const popularData: PopularUsers = {
+            uid: uid,
+            totalCommentsReceived: 0,
+            totalLikesReceived: getTotalLikes
+        }
+
+        await setDoc(doc(this.db, 'popularUsers', uid), popularData);
+    }
+
     async getPopularUsers(): Promise<DocumentData[]> {
         if (!this.db) return [];
 
@@ -272,47 +290,42 @@ class Firebase {
 
         const usersMap = new Map(usersDB.map(user => [user.uid, user]));
 
-        // Obtener y ordenar los usuarios populares
-        const populars = getData.docs
+        const getAndOrderPopularUsers = getData.docs
             .map(doc => doc.data())
             .sort((a, b) => b.totalLikesReceived - a.totalLikesReceived)
             .slice(0, 5);
 
-        // Filtrar y mapear los usuarios populares a partir del mapa
-        const popularUsers = populars
+        const popularUsers = getAndOrderPopularUsers
             .map(popular => usersMap.get(popular.uid))
             .filter(user => user !== undefined);
 
         return popularUsers;
-
-        /*let populars: DocumentData[] = [];
-        getData.forEach((data) => populars = [...populars, data.data()]);
-        populars.sort((a, b) => b.totalLikesReceived - a.totalLikesReceived);
-
-        let popularUsers: DocumentData[] = [];
-
-        populars.slice(0, 5).forEach((popular) => {
-            for (let user of usersDB) {
-                if (user.uid === popular.uid) popularUsers = [...popularUsers, user];
-            }
-        })
-
-        return popularUsers;*/
     }
+
+    async getRecentActivity(uid: string) {
+        const getActivity = await firebase.getData('recentActivity', uid);
+
+        if(!getActivity) return [];
+
+        const usersDB = await this.getAllUsers();
+        const usersMap = new Map(usersDB.map(user => [user.uid, user]));
+
+        const recentActivity = [...getActivity.users]
+            .map((user) => usersMap.get(user))
+            .filter(user => user !== undefined);
+
+        return recentActivity;
+    } 
 
     async setRecentActivity(idCreator: string, uid: string, currentData: string[]) {
         if(!this.db) return;
 
-        let newData: string[] = [];
         let index = currentData.indexOf(idCreator);
 
-        if(index === -1) {
-            newData = [idCreator, ...currentData];
-        } else {
-            currentData.splice(index, 1);
+        if(currentData.length === 5 && index === -1) currentData.pop();
+        if(index >= 0) currentData.splice(index, 1);
 
-            newData = [idCreator, ...currentData];
-        }
+        let newData = [idCreator, ...currentData];
 
         await setDoc(doc(this.db, 'recentActivity', uid), {users: newData})
     }

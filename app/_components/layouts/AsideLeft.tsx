@@ -1,9 +1,8 @@
 'use client';
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -19,10 +18,29 @@ import {
 
 import { IconTema, iconsTemas } from "../../_utilities/asideLeftItems";
 
+import { AvatarImg } from "../ui";
+import { DocumentData } from "firebase/firestore";
+
+import useAutenticacion from "@/app/_hooks/useAuthUser";
+import firebase from "@/app/_firebase/firebase";
+
 export default function AsideLeft() {
     const [mostrar, setMostrar] = useState(false);
+    const [recentActivity, setRecentActivity] = useState<DocumentData>([]);
 
     const path = usePathname();
+
+    const user = useAutenticacion();
+
+    useEffect(() => {
+        if(user) fetchRecentActivity(user.uid);
+    }, [user])
+
+    const fetchRecentActivity = async (uid: string) => {
+        const getRecentActivity = await firebase.getRecentActivity(uid);
+
+        setRecentActivity(getRecentActivity);
+    }
 
     return (
         <aside className="left none bg-color scroll-bar-style">
@@ -42,80 +60,36 @@ export default function AsideLeft() {
 
             <hr />
 
-            <Accordion className='w-full text-color acordeon' defaultExpanded sx={{ backgroundColor: 'transparent', boxShadow: 'none', "::before": { display: 'none' } }}>
-                <AccordionSummary
-                    expandIcon={<ExpandMore className='icon-expanded' />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                    className="titulo-acordeon"
-                >
-                    Recientes
-                </AccordionSummary>
+            {recentActivity.length > 0 && (
+                <>
+                    <Accordion className='w-full text-color acordeon' defaultExpanded sx={{ backgroundColor: 'transparent', boxShadow: 'none', "::before": { display: 'none' } }}>
+                        <AccordionSummary
+                            expandIcon={<ExpandMore className='icon-expanded' />}
+                            aria-controls="panel1-content"
+                            id="panel1-header"
+                            className="titulo-acordeon"
+                        >
+                            Recientes
+                        </AccordionSummary>
 
-                <AccordionDetails className='acordeon-items-container' sx={{ padding: '0' }}>
-                    <Link href='#' className="flex align-center justify-start text-color w-full bg-hover">
-                        <Image
-                            src={'/images/perfil.jpg'}
-                            alt="img-profile"
-                            width={30}
-                            height={30}
-                            className="img-profile"
-                        />
+                        <AccordionDetails className='acordeon-items-container' sx={{ padding: '0' }}>
+                            {recentActivity.map((user: DocumentData) => (
+                                <Link key={user.uid} href={`/u/${user.displayName}`} className="flex align-center justify-start text-color w-full bg-hover">
+                                    <AvatarImg
+                                        size={30}
+                                        fontSize={20}
+                                        user={user}
+                                    />
 
-                        <span>u/charlotteG</span>
-                    </Link>
+                                    <span>{`u/${user.displayName}`}</span>
+                                </Link>
+                            ))}
+                        </AccordionDetails>
+                    </Accordion>
 
-                    <Link href='#' className="flex align-center justify-start text-color w-full bg-hover">
-                        <Image
-                            src={'/images/perfil.jpg'}
-                            alt="img-profile"
-                            width={30}
-                            height={30}
-                            className="img-profile"
-                        />
-
-                        <span>u/charlotteG</span>
-                    </Link>
-
-                    <Link href='#' className="flex align-center justify-start text-color w-full bg-hover">
-                        <Image
-                            src={'/images/perfil.jpg'}
-                            alt="img-profile"
-                            width={30}
-                            height={30}
-                            className="img-profile"
-                        />
-
-                        <span>u/charlotteG</span>
-                    </Link>
-
-                    <Link href='#' className="flex align-center justify-start text-color w-full bg-hover">
-                        <Image
-                            src={'/images/perfil.jpg'}
-                            alt="img-profile"
-                            width={30}
-                            height={30}
-                            className="img-profile"
-                        />
-
-                        <span>u/charlotteG</span>
-                    </Link>
-
-                    <Link href='#' className="flex align-center justify-start text-color w-full bg-hover">
-                        <Image
-                            src={'/images/perfil.jpg'}
-                            alt="img-profile"
-                            width={30}
-                            height={30}
-                            className="img-profile"
-                        />
-
-                        <span>u/charlotteG</span>
-                    </Link>
-                </AccordionDetails>
-            </Accordion>
-
-            <hr />
+                    <hr />
+                </>
+            )}
 
             <Accordion className='w-full text-color acordeon' defaultExpanded sx={{ backgroundColor: 'transparent', boxShadow: 'none', "::before": { display: 'none' } }}>
                 <AccordionSummary
