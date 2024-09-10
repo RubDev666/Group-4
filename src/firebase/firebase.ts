@@ -53,13 +53,8 @@ class Firebase {
             photoURL: res.user.photoURL,
             dateRegister: getDateRegister()
         }
-<<<<<<< HEAD:app/_firebase/firebase.ts
-
-        const popularData: PopularUsers = {
-=======
         
         /*const popularData: PopularUsers = {
->>>>>>> improve-everything:src/firebase/firebase.ts
             uid: res.user.uid,
             totalCommentsReceived: 0,
             totalLikesReceived: 0
@@ -293,21 +288,6 @@ class Firebase {
 
         const usersDB = await this.getAllUsers();
 
-<<<<<<< HEAD:app/_firebase/firebase.ts
-        let populars: DocumentData[] = [];
-        getData.forEach((data) => populars = [...populars, data.data()]);
-        populars.sort((a, b) => b.totalLikesReceived - a.totalLikesReceived);
-
-        let popularUsers: DocumentData[] = [];
-
-        for (let i = 0; i < 5; i++) {
-            if (!populars[i]) break;
-
-            for (let user of usersDB) {
-                if (user.uid === populars[i].uid) popularUsers = [...popularUsers, user];
-            }
-        }
-=======
         const usersMap = new Map(usersDB.map(user => [user.uid, user]));
 
         const getAndOrderPopularUsers = getData.docs
@@ -318,7 +298,6 @@ class Firebase {
         const popularUsers = getAndOrderPopularUsers
             .map(popular => usersMap.get(popular.uid))
             .filter(user => user !== undefined);
->>>>>>> improve-everything:src/firebase/firebase.ts
 
         return popularUsers;
     }
