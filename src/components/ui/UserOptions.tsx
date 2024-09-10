@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import AvatarImg from "./AvatarImg";
 
-import { User } from "firebase/auth";
 import firebase from "@/src/firebase/firebase";
 
 import { styled } from '@mui/material/styles';
@@ -24,10 +23,7 @@ import { Settings, Logout, Create } from "@mui/icons-material";
 
 import themeColors from "@/src/utilities/themeColors";
 
-type UserOptionsProps = {
-    theme: string;
-    usuario: User;
-}
+import type { UserOptionsProps } from "@/src/types/components-props";
 
 //este es solo si queremos modificar el tooltip acorde al tema del usuario
 interface ColoresProps extends TooltipProps {

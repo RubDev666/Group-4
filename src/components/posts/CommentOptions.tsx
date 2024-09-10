@@ -12,12 +12,9 @@ import {
 } from "@mui/material";
 import { MoreHoriz, Delete, Edit } from '@mui/icons-material';
 
-type CommentOptionsParams = {
-    deleteF: () => void;
-    setEdit: Dispatch<SetStateAction<boolean>>;
-}
+import type { CommentOptionsProps } from '@/src/types/components-props';
 
-export default function CommentOptions({deleteF, setEdit}: CommentOptionsParams) {
+export default function CommentOptions({deleteF, setEdit}: CommentOptionsProps) {
     const [mounted, setMounted] = useState(false);
     const { theme } = useTheme();
 

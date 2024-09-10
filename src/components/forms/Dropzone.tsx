@@ -6,12 +6,7 @@ import { useDropzone } from "react-dropzone";
 
 import { Collections } from "@mui/icons-material";
 
-type DZProps = {
-    getImg: Dispatch<SetStateAction<File | undefined | string>>;
-    img: File | undefined | string;
-    setErrorImg: Dispatch<SetStateAction<string>>;
-    errorImg: string;
-}
+import type { DZProps } from "@/src/types/components-props";
 
 export default function Dropzone({ getImg, img, setErrorImg, errorImg }: DZProps) {
     const [previewImg, setPreviewImg] = useState<string>('');

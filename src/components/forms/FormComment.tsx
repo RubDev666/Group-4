@@ -9,16 +9,7 @@ import useAutenticacion from "@/src/hooks/useAuthUser";
 
 import firebase from "@/src/firebase/firebase";
 
-type FormCommentProps = {
-    post: DocumentData;
-    setFormComment?: Dispatch<SetStateAction<boolean>>;
-    comentario: string;
-    setComentario: Dispatch<SetStateAction<string>>;
-    isReplyForm: boolean;
-    comentarioId?: string;
-    setComentarioId?: Dispatch<SetStateAction<string>>;
-    indexComment?: number;
-}
+import type { FormCommentProps } from "@/src/types/components-props";
 
 export default function FormComment({ post, setFormComment, comentario, setComentario, isReplyForm, setComentarioId, indexComment }: FormCommentProps) {
     const usuario = useAutenticacion();

@@ -10,11 +10,12 @@ import { Spinner, AvatarImg } from "../ui";
 import useAutenticacion from "@/src/hooks/useAuthUser";
 
 import { UserFormType } from '@/src/types';
+import type { PostProps } from "@/src/types/components-props";
 
 import firebase from '@/src/firebase/firebase';
 import { DocumentData } from "firebase/firestore";
 
-export default function EditPostForm({ idPost }: { idPost: string }) {
+export default function EditPostForm({ idPost }: PostProps) {
     const [imgFile, setImgFile] = useState<File | undefined | string>(undefined)
     const [loading, setLoading] = useState(true);
     const [errorImg, setErrorImg] = useState<string>('');

@@ -1,7 +1,8 @@
 'use client';
 
 import { useForm, SubmitHandler } from "react-hook-form";
-import { FormsSessionProps, LoginType } from "@/src/types";
+import { LoginType } from "@/src/types";
+import type { FormsSessionProps } from "@/src/types/components-props";
 import firebase from "@/src/firebase/firebase";
 
 export default function FormLogin({ select, setFormRegister, blur, setErrorSubmit, setExito, errorSubmit, setFormModal }: FormsSessionProps) {

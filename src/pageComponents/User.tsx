@@ -8,11 +8,12 @@ import { Post } from "../components/posts";
 import { DocumentData } from "firebase/firestore";
 
 import { GlobalContext } from "@/src/app/providers";
-import { AllPostsType } from "@/src/types";
+import type { AllPostsType } from "@/src/types";
+import type { UserProps } from "../types/components-props";
  
 import firebase from "@/src/firebase/firebase";
 
-export default function User({ userName }: { userName: string }) {
+export default function User({ userName }: UserProps) {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<DocumentData | null>(null);
     const [posts, setPosts] = useState<AllPostsType[] | []>([]);

@@ -1,23 +1,11 @@
 import { User } from "firebase/auth";
 import { DocumentData } from "firebase/firestore";
-import { Dispatch, SetStateAction } from "react";
-
-export type FormsSessionProps = {
-    select: (e: React.FocusEvent<HTMLInputElement>) => void;
-    blur: (e: React.FocusEvent<HTMLInputElement>) => void;
-    setFormRegister: Dispatch<SetStateAction<boolean>>;
-    setExito: Dispatch<SetStateAction<boolean>>;
-    errorSubmit: string;
-    setErrorSubmit: Dispatch<SetStateAction<string>>;
-    setFormModal?: Dispatch<SetStateAction<boolean>>;
-}
 
 export type RegisterType = {
     name: string,
     email: string,
     password: string,
     confirmPassword: string,
-    
 }
 
 export type UserDbType = {
@@ -27,30 +15,25 @@ export type UserDbType = {
     dateRegister: string
 }
 
-export type PopularUsers = {
-    uid: string;
+export type PopularUsers = Pick<UserDbType, 'uid'> & {
     totalLikesReceived: number;
     totalCommentsReceived: number;
 }
 
-export type LoginType = {
-    email: string,
-    password: string,
+export type LoginType = Pick<RegisterType, 'email' | 'password'>;
+
+type MainPostProperties = {
+    title: string;
+    description: string;
 }
 
-export type UserFormType = {
-    name: string, //edit-profile
-
-    //create/edit post
-    title: string,
-    description: string,
-}
+export type UserFormType =  MainPostProperties & Pick<RegisterType, 'name'>;
 
 type GlobalTypesPost = {
     id: string;
     idUser: string;
     date: number;
-    likes: string[] | [];
+    likes: string[];
 }
 
 export interface ReplyTypes extends GlobalTypesPost {
@@ -58,19 +41,15 @@ export interface ReplyTypes extends GlobalTypesPost {
 }
 
 export interface CommentTypes extends ReplyTypes {
-    respuestas: ReplyTypes[] | [];
+    respuestas: ReplyTypes[];
 }
 
-export interface PostTypes extends GlobalTypesPost {
-    title: string;
-    description: string;
+export interface PostTypes extends GlobalTypesPost, MainPostProperties {
     imgUrl: string | null;
-    comments: CommentTypes[] | [];
+    comments: CommentTypes[];
 }
 
-export type CreatePostArg = {
-    title: string;
-    description: string;
+export type CreatePostArg = MainPostProperties & {
     imgFile: File | undefined;
     user: User;
 }
@@ -85,13 +64,11 @@ export type updatePostParams = {
     idCreator?: string;
     key: string;
     currentData?: number;
-    newData: CommentTypes[] | string[] | [];
+    newData: CommentTypes[] | string[];
 }
 
-export type EditPost = {
+export type EditPost = MainPostProperties & {
     idPost: string;
-    title: string;
-    description: string;
     imgUrl: string | File | null;
     deleteImg: boolean;
 }

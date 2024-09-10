@@ -9,11 +9,12 @@ import { DocumentData } from "firebase/firestore";
 
 import { GlobalContext } from "@/src/app/providers";
 import firebase from "@/src/firebase/firebase";
-import { AllPostsType } from "@/src/types";
+import type { AllPostsType } from "@/src/types";
+import type { PostProps } from "../types/components-props";
 
 import useAutenticacion from "@/src/hooks/useAuthUser";
 
-export default function Post({ idPost }: { idPost: string }) {
+export default function Post({ idPost }: PostProps) {
     const [formComment, setFormComment] = useState(false);
     const [comentario, setComentario] = useState<string>('');
     const [comentarioId, setComentarioId] = useState<string>('');

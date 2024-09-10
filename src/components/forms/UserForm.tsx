@@ -10,12 +10,9 @@ import { Spinner, AvatarImg } from "../ui";
 import useAutenticacion from "@/src/hooks/useAuthUser";
 
 import { UserFormType } from '@/src/types';
+import type { TypeOfFormProps } from "@/src/types/components-props";
 
 import firebase from '@/src/firebase/firebase';
-
-type userFormProps = {
-    typeForm: 'createPost' | 'editProfile';
-}
 
 const FormActions = {
     createPost: {
@@ -28,7 +25,7 @@ const FormActions = {
     }
 }
 
-export default function UserForm({ typeForm }: userFormProps) {
+export default function UserForm({ typeForm }: TypeOfFormProps) {
     const [imgFile, setImgFile] = useState<File | undefined | string>(undefined)
     const [loading, setLoading] = useState(true);
     const [errorImg, setErrorImg] = useState<string>('');

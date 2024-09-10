@@ -18,12 +18,7 @@ import firebase from "@/src/firebase/firebase";
 
 import CommentOptions from "./CommentOptions";
 
-type CommentProps = {
-    comentario: DocumentData;
-    setComentarioId: Dispatch<SetStateAction<string>>;
-    currentPost: DocumentData;
-    indexComment: number;
-}
+import type { CommentProps } from "@/src/types/components-props";
 
 export default function Comment({ comentario, setComentarioId, currentPost, indexComment }: CommentProps) {
     const [edit, setEdit] = useState(false);

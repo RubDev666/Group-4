@@ -3,13 +3,10 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import Post from "@/src/pageComponents/Post";
 import firebase from '@/src/firebase/firebase';
 
-type Props = {
-    params: { id: string }
-    searchParams: { [key: string]: string | string[] | undefined }
-}
+import type { Params, DynamicParams } from '@/src/types/components-props';
 
 export async function generateMetadata(
-    { params, searchParams }: Props,
+    { params, searchParams }: DynamicParams,
     parent: ResolvingMetadata
 ): Promise<Metadata> {
     const post = await firebase.getData('posts', params.id);
@@ -21,6 +18,6 @@ export async function generateMetadata(
     }
 }
 
-export default function Page({ params }: { params: { id: string } }) {
+export default function Page({ params }: Params) {
     return <Post idPost={params.id} />
 }

@@ -1,13 +1,8 @@
 import { DocumentData } from "firebase/firestore";
-import { User } from "firebase/auth";
 
 import { Avatar } from "@mui/material";
 
-type AvatarProps = {
-    size: number;
-    fontSize: number;
-    user: DocumentData | User;
-}
+import type { AvatarProps } from "@/src/types/components-props";
 
 export default function AvatarImg({ size, fontSize, user }: AvatarProps) {
     const initialLetter = user.displayName?.charAt(0).toLocaleUpperCase();

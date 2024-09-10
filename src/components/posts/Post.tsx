@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { FavoriteBorder, ChatBubbleOutline, IosShare, Favorite } from '@mui/icons-material';
-import { DocumentData } from 'firebase/firestore';
 
 import { AvatarImg } from '../ui';
 
@@ -18,7 +17,9 @@ import PostOptions from './PostOptions';
 
 import { GlobalContext } from "@/src/app/providers";
 
-export default function Post({ postData, creador }: { postData: DocumentData, creador: DocumentData }) {
+import type { PostComponentProps } from '@/src/types/components-props';
+
+export default function Post({ postData, creador }: PostComponentProps) {
     const [currentLikes, setCurrentLikes] = useState<number>(postData.likes.length);
 
     const path = usePathname();

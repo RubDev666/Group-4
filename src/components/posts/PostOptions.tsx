@@ -15,7 +15,9 @@ import { MoreHoriz, Delete, Edit } from '@mui/icons-material';
 import firebase from '@/src/firebase/firebase';
 import { GlobalContext } from "@/src/app/providers";
 
-export default function PostOptions({idPost}: {idPost: string}) {
+import type { PostProps } from '@/src/types/components-props';
+
+export default function PostOptions({idPost}: PostProps) {
     const [mounted, setMounted] = useState(false);
     const { theme } = useTheme();
 

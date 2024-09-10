@@ -17,13 +17,9 @@ import useAutenticacion from "@/src/hooks/useAuthUser";
 import firebase from "@/src/firebase/firebase";
 import CommentOptions from "./CommentOptions";
 
-type ReplyPops = {
-    respuesta: DocumentData;
-    currentPost: DocumentData;
-    indexComment: number;
-}
+import type { ReplyProps } from "@/src/types/components-props";
 
-export default function Reply({ respuesta, currentPost, indexComment }: ReplyPops) {
+export default function Reply({ respuesta, currentPost, indexComment }: ReplyProps) {
     const [edit, setEdit] = useState(false);
     const [comentarioEdit, setComentarioEdit] = useState<string>(respuesta.comment);
     const { allUsers, setFormModal } = useContext(GlobalContext);

@@ -3,7 +3,8 @@
 import { useContext } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import firebase from "@/src/firebase/firebase";
-import { RegisterType, FormsSessionProps } from "@/src/types";
+import { RegisterType } from "@/src/types";
+import type { FormsSessionProps } from "@/src/types/components-props";
 
 import { GlobalContext } from "@/src/app/providers";
 
