@@ -23,7 +23,7 @@ export default function Post({ idPost }: PostProps) {
 
     const usuario = useAutenticacion();
 
-    const { allPosts, setFormModal } = useContext(GlobalContext);
+    const { allPosts, setFormModal, loading: firstload } = useContext(GlobalContext);
 
     useEffect(() => {
         const getPost = async () => {
@@ -65,7 +65,11 @@ export default function Post({ idPost }: PostProps) {
         setFormComment(true)
     }
 
-    if (loading) return <Spinner />
+    //if (loading) return <Spinner />
+
+    if(firstload) return <Spinner />;
+
+    if(loading) return null;
 
     return (
         <>

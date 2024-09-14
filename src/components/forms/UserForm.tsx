@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from "react-hook-form";
 
@@ -13,6 +13,8 @@ import { UserFormType } from '@/src/types';
 import type { TypeOfFormProps } from "@/src/types/components-props";
 
 import firebase from '@/src/firebase/firebase';
+
+import { GlobalContext } from "@/src/app/providers";
 
 const FormActions = {
     createPost: {
@@ -31,6 +33,8 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
     const [errorImg, setErrorImg] = useState<string>('');
 
     const { register, handleSubmit, formState: { errors }, watch } = useForm<UserFormType>();
+
+    const {setRefresh, loading: firstload} = useContext(GlobalContext);
 
     const usuario = useAutenticacion();
     const router = useRouter();
@@ -56,11 +60,15 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
                 if (imgFile && usuario) {
                     await firebase.updateProfileImg(imgFile, usuario);
 
+                    setRefresh(true);
+
                     if (data.name === '') router.push('/u/' + usuario.displayName);
                 }
 
                 if (data.name !== '' && usuario) {
                     await firebase.updateUserName(data.name.replace(/ /g, ""), usuario);
+
+                    setRefresh(true);
 
                     router.push('/u/' + data.name.replace(/ /g, ""));
                 }
@@ -84,7 +92,11 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
     }
 
     //animacion mientras carga el usuario autenticado
-    if (loading && !usuario) return <div className="w-full"><Spinner /></div>
+    //if (loading && !usuario) return <div className="w-full"><Spinner /></div>;
+
+    if(firstload) return <Spinner />; 
+
+    if (loading && !usuario) return null;
 
     //si no hay usuarios nos redirecciona al inicio
     if (!loading && !usuario) router.push('/');

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-//import Index from "./_pages-components/Index";
 import Main from "../pageComponents/Main";
 
 export const metadata: Metadata = {
@@ -9,7 +8,5 @@ export const metadata: Metadata = {
 }; 
 
 export default function Home() {
-    return (
-        <Main />
-    );
+    return <Main />;
 }

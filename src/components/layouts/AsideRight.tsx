@@ -40,17 +40,21 @@ export default function AsideRight() {
                         </>
                     )}
 
-                    {popularUsers.map((user: DocumentData) => (
-                        <Link key={user.uid} href={`/u/${user.displayName}`} className="flex align-center justify-start text-color w-full bg-hover">
-                            <AvatarImg
-                                size={30}
-                                fontSize={20}
-                                user={user}
-                            />
+                    {!loadingPopular && (
+                        <>
+                            {popularUsers.map((user: DocumentData) => (
+                                <Link key={user.uid} href={`/u/${user.displayName}`} className="flex align-center justify-start text-color w-full bg-hover">
+                                    <AvatarImg
+                                        size={30}
+                                        fontSize={20}
+                                        user={user}
+                                    />
 
-                            <span>{`u/${user.displayName}`}</span>
-                        </Link>
-                    ))}
+                                    <span>{`u/${user.displayName}`}</span>
+                                </Link>
+                            ))}
+                        </>
+                    )}
                 </AccordionDetails>
             </Accordion>
 

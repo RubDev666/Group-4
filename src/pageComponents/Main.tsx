@@ -12,33 +12,29 @@ import { GlobalContext } from '@/src/app/providers';
 export default function Main() {
     const { allPosts, loading } = useContext(GlobalContext);
 
-    if (!allPosts) return (
-        <div className="main-container w-full">
-            <p>error....</p>
-        </div>
-    )
-
     if (loading) return (
         <div className="main-container w-full">
             <Spinner />
         </div>
     )
 
+    if (!allPosts || allPosts.length === 0) {
+        return (
+            <div className="main-container w-full">
+                <p>{!allPosts ? 'Error al cargar datos...' : 'Se el primero en publicar...'}</p>
+            </div>
+        );
+    }
+
     return (
         <div className="main-container w-full">
-            {(allPosts.length > 0) ? (
-                <>
-                    {allPosts.map((dato: AllPostsType) => (
-                        <Post
-                            key={dato.posts.id}
-                            postData={dato.posts}
-                            creador={dato.usuario}
-                        />
-                    ))}
-                </>
-            ) : (
-                <p>se el primero en publicar...</p>
-            )}
+            {allPosts.map((dato: AllPostsType) => (
+                <Post
+                    key={dato.posts.id}
+                    postData={dato.posts}
+                    creador={dato.usuario}
+                />
+            ))}
         </div>
     );
 }

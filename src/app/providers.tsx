@@ -2,11 +2,25 @@
 
 import { ThemeProvider } from 'next-themes';
 import { useState, useEffect, createContext } from 'react';
-import { AllPostsType } from '../types';
+import { AllPostsType, AllUsersFetch, GlobalContextType } from '../types';
 import firebase from '../firebase/firebase';
 import { DocumentData } from 'firebase/firestore';
+
+const defaultValues: GlobalContextType = {
+    navModal: false,
+    formModal: false,
+    setNavModal: () => {},
+    setFormModal: () => {},
+    allPosts: [],
+    allUsers: null,
+    getPosts: async () => {},
+    loading: true,
+    popularUsers: [],
+    loadingPopular: true,
+    setRefresh: () => {},
+};
  
-export const GlobalContext = createContext<any>({}); 
+export const GlobalContext = createContext<GlobalContextType>(defaultValues); 
 
 //el codigo original llevaba esto, pero era un ejemplo con tailwind
 //<ThemeProvider attribute="class" defaultTheme='system' enableSystem>
@@ -19,15 +33,34 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     const [popularUsers, setPopularUsers] = useState<DocumentData[]>([]);
     const [allPosts, setAllPosts] = useState<AllPostsType[]>([]);
-    const [allUsers, setAllUsers] = useState<DocumentData[]>([]);
+    const [allUsers, setAllUsers] = useState<AllUsersFetch>(null);
+
+    //when the user edits their profile
+    const [refresh, setRefresh] = useState(false);
 
     useEffect(() => {
-        getPosts();
+        const fetchData = async () => {
+            await getPosts();
+            await getPopulars();
+        };
+    
+        fetchData();
+    }, []);
+    
+    useEffect(() => {
+        if (refresh) {
+            const refreshData = async () => {
+                await getPosts();
+                await getPopulars();
 
-        getPop();
-    }, [])
+                setRefresh(false);
+            };
+    
+            refreshData();
+        }
+    }, [refresh]);    
 
-    const getPop = async () => {
+    const getPopulars = async () => {
         const res = await firebase.getPopularUsers();
 
         setPopularUsers(res);
@@ -49,29 +82,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
         const bgNavModal = document.querySelector('.bg-modal.nav-modal') as HTMLElement;
         const body = document.querySelector('BODY') as HTMLElement;
 
-        if(formModal) {
-            loginModal.classList.add('active');
-        } else {
-            loginModal.classList.remove('active');
-        }
+        loginModal.classList.toggle('active', formModal);
+        asideLeft.classList.toggle('flex', !navModal);
+        asideLeft.classList.toggle('none', !navModal);
+        bgNavModal.classList.toggle('active', navModal);
 
-        if(!navModal) {
-            asideLeft.classList.add('flex');
-            asideLeft.classList.add('none');
-
-            bgNavModal.classList.remove('active');
-        } else {
-            asideLeft.classList.remove('flex');
-            asideLeft.classList.remove('none');
-
-            bgNavModal.classList.add('active');
-        }
-
-        if(navModal || formModal) {
-            body.style.overflowY = 'hidden';
-        } else {
-            body.style.overflowY = 'auto';
-        }
+        body.style.overflowY = (navModal || formModal) ? 'hidden' : 'auto';
     }, [navModal, formModal])
 
     return (
@@ -87,7 +103,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     getPosts,
                     loading: loadingData,
                     popularUsers,
-                    loadingPopular
+                    loadingPopular,
+                    setRefresh,
                 }}
             >
                 {children}

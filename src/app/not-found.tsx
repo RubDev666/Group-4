@@ -2,6 +2,6 @@ import { NotFound as NotFoundComponent} from '../components/ui';
 
 export default function NotFound() {
     return (
-        <NotFoundComponent message='Pagina no encontrada, regresa al inicio idiota...' />
+        <NotFoundComponent message='Pagina no encontrada, regresa al inicio para ver temas interesantes.' />
     )
 }

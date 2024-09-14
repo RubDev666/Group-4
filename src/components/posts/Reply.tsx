@@ -23,7 +23,7 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPro
     const [edit, setEdit] = useState(false);
     const [comentarioEdit, setComentarioEdit] = useState<string>(respuesta.comment);
     const { allUsers, setFormModal } = useContext(GlobalContext);
-    const [usuarioReply, setUsuarioReply] = useState<DocumentData | null>(null);
+    const [usuarioReply, setUsuarioReply] = useState<DocumentData | undefined>(undefined);
 
     const usuario = useAutenticacion();
     const router = useRouter();
@@ -31,17 +31,9 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPro
     useEffect(() => {
         const getUserPost = () => {
             if (allUsers) {
-                let us: DocumentData | null = null;
+                const getUser = allUsers.get(respuesta.idUser);
 
-                for (const user of allUsers) {
-                    if (user.uid === respuesta.idUser) {
-                        us = user;
-
-                        break;
-                    }
-                }
-
-                setUsuarioReply(us);
+                setUsuarioReply(getUser);
             }
         }
 

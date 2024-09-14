@@ -1,6 +1,20 @@
 import { User } from "firebase/auth";
 import { DocumentData } from "firebase/firestore";
 
+export interface GlobalContextType {
+    navModal: boolean;
+    formModal: boolean;
+    setNavModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setFormModal: React.Dispatch<React.SetStateAction<boolean>>;
+    allPosts: AllPostsType[];
+    allUsers: AllUsersFetch;
+    getPosts: () => Promise<void>;
+    loading: boolean;
+    popularUsers: DocumentData[];
+    loadingPopular: boolean;
+    setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 export type RegisterType = {
     name: string,
     email: string,
@@ -58,6 +72,8 @@ export type AllPostsType = {
     usuario: DocumentData;
     posts: DocumentData;
 }
+
+export type AllUsersFetch = Map<string, DocumentData> | null;
 
 export type updatePostParams = {
     idPost: string;

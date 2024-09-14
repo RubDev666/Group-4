@@ -25,7 +25,7 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
     const [comentarioEdit, setComentarioEdit] = useState<string>(comentario.comment);
     const { allUsers, setFormModal } = useContext(GlobalContext);
 
-    const [usuarioPost, setUsuarioPost] = useState<DocumentData | null>(null);
+    const [usuarioPost, setUsuarioPost] = useState<DocumentData | undefined>(undefined);
 
     const usuario = useAutenticacion();
     const router = useRouter();
@@ -33,17 +33,9 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
     useEffect(() => {
         const getUserPost = () => {
             if (allUsers) {
-                let us: DocumentData | null = null;
+                const getUser = allUsers.get(comentario.idUser);
 
-                for (const user of allUsers) {
-                    if (user.uid === comentario.idUser) {
-                        us = user;
-
-                        break;
-                    }
-                }
-
-                setUsuarioPost(us);
+                setUsuarioPost(getUser);
             }
         }
 

@@ -1,13 +1,13 @@
 import firebaseConfig from './config';
 
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut, User, Auth, sendEmailVerification, onAuthStateChanged } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut, User, Auth, sendEmailVerification } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, FirebaseStorage } from 'firebase/storage';
 import { getFirestore, collection, getDocs, orderBy, query, deleteDoc, doc, getDoc, updateDoc, DocumentData, setDoc, Firestore } from 'firebase/firestore';
 
-import { RegisterType, UserDbType, LoginType, PostTypes, CreatePostArg, AllPostsType, updatePostParams, EditPost, PopularUsers } from '../types';
-import getDateRegister from '../utilities/getDateRegister';
-import getRandomColor from '../utilities/getRandomColor';
+import { RegisterType, UserDbType, LoginType, PostTypes, CreatePostArg, AllPostsType, updatePostParams, EditPost, PopularUsers, AllUsersFetch } from '../types';
+
+import { getDateRegister, getRandomColor, CONECTION_ERROR_MESSAGE } from './utils';
 
 import { v4 as generateId } from 'uuid';
 
@@ -28,24 +28,29 @@ class Firebase {
 
     //registrar usuario
     async registrar(data: RegisterType) {
-        if (!this.auth || !this.db) throw new Error('Fallo la conexion, intentelo mas tarde*');
+        if (!this.auth || !this.db) throw new Error(CONECTION_ERROR_MESSAGE);
 
         const { name, email, password } = data;
+        const cleanName = name.replace(/ /g, "");
 
-        const nameUserVerified = await this.getData('usuarios', name.replace(/ /g, ""));
+        const nameUserVerified = await this.getData('usuarios', cleanName);
 
         if (nameUserVerified) throw new Error('El nombre de usuario ya esta en uso*');
 
         const res = await createUserWithEmailAndPassword(this.auth, email, password);
 
-        if (this.auth.currentUser) await updateProfile(this.auth.currentUser, { displayName: name.replace(/ /g, ""), photoURL: getRandomColor() });
+        const currentUser = this.auth.currentUser;
 
-        if (this.auth.currentUser) sendEmailVerification(this.auth.currentUser)
-            .then(() => {
-                // Email verification sent!
-                // ...
-                console.log('email enviado');
-            });
+        if (currentUser) {
+            await updateProfile(currentUser, { displayName: cleanName, photoURL: getRandomColor() });
+
+            sendEmailVerification(currentUser)
+                .then(() => {
+                    // Email verification sent!
+                    // ...
+                    console.log('email enviado');
+                });
+        }
 
         const newUser: UserDbType = {
             uid: res.user.uid,
@@ -53,18 +58,8 @@ class Firebase {
             photoURL: res.user.photoURL,
             dateRegister: getDateRegister()
         }
-        
-        /*const popularData: PopularUsers = {
-            uid: res.user.uid,
-            totalCommentsReceived: 0,
-            totalLikesReceived: 0
-        }*/
 
-        if (res.user.displayName) {
-            await setDoc(doc(this.db, "usuarios", res.user.displayName), newUser);
-
-            //await setDoc(doc(this.db, 'popularUsers', res.user.uid), popularData)
-        }
+        if (res.user.displayName) await setDoc(doc(this.db, "usuarios", res.user.displayName), newUser);
     }
 
     cerrarSesion = async () => {
@@ -76,24 +71,19 @@ class Firebase {
     }
 
     async updateProfileImg(img: File, user: User) {
-        if (!this.auth) return;
-        if (!this.db) return;
-        if (!this.auth.currentUser) return;
+        if (!this.auth || !this.db || !this.auth.currentUser) return;
 
         //obtener url y actualizar el perfil del usuario
-        const urlImg = await this.uploadImg(`images/profiles/${user.uid}`, img)
+        const urlImg = await this.uploadImg(`images/profiles/${user.uid}`, img);
 
         await updateProfile(this.auth.currentUser, { photoURL: urlImg });
 
         //actualizar la base de datos con el usuario
-        if (user.displayName) {
-            const referencia = doc(this.db, "usuarios", user.displayName);
-            await updateDoc(referencia, { photoURL: urlImg })
-        }
+        if (user.displayName) await updateDoc(doc(this.db, "usuarios", user.displayName), { photoURL: urlImg });
     }
 
     async updateUserName(name: string, usuario: User) {
-        if (!this.auth || !this.db) throw new Error('Fallo la conexion, intentelo mas tarde*');
+        if (!this.auth || !this.db) throw new Error(CONECTION_ERROR_MESSAGE);
 
         const nameUserVerified = await this.getData('usuarios', name);
         if (nameUserVerified) throw new Error('El nombre de usuario ya esta en uso*');
@@ -147,7 +137,7 @@ class Firebase {
 
     //guardar la imagen para post o foto de perfil en la base de datos
     async uploadImg(ubicacion: string, img: File): Promise<string> {
-        if (!this.storage) throw new Error('Fallo la conexion, intentelo mas tarde*');
+        if (!this.storage) throw new Error(CONECTION_ERROR_MESSAGE);
 
         const storageRef = ref(this.storage, ubicacion);
         await uploadBytes(storageRef, img);
@@ -162,58 +152,43 @@ class Firebase {
     async getData(ref: string, idData: string): Promise<DocumentData | null> {
         if (!this.db) return null;
 
-        const docRef = doc(this.db, ref, idData);
-        const docSnap = await getDoc(docRef);
-
-        let datos: DocumentData | null;
+        const docSnap = await getDoc(doc(this.db, ref, idData));
 
         if (docSnap.exists()) {
-            datos = docSnap.data();
+            return docSnap.data();
         } else {
-            datos = null
+            return null
         }
-
-        return datos;
     }
 
-    async getAllPosts(): Promise<AllPostsType[] | []> {
+    async getAllPosts(): Promise<AllPostsType[]> {
         if (!this.db) return [];
 
-        const refPosts = query(collection(this.db, "posts"), orderBy('date', 'desc'));
-        const resPosts = await getDocs(refPosts);
+        const resPosts = await getDocs(query(collection(this.db, "posts"), orderBy('date', 'desc')));
+        const usersMap = await this.getAllUsers();
+
+        if(!usersMap) return [];
+
+        const getData = resPosts.docs.map(post => {
+            const postData = post.data();
+            const user = usersMap.get(postData.idUser);
+        
+            return user ? { usuario: user, posts: postData } : null;
+        }).filter(post => post !== null);
+        
+        return getData;
+    }
+    async getAllUsers(): Promise<AllUsersFetch> {
+        if (!this.db) return null;
 
         const refUsers = query(collection(this.db, 'usuarios'));
         const resUsers = await getDocs(refUsers);
 
-        let posts: AllPostsType[] | [] = [];
+        const users = resUsers.docs.map(user => user.data());
 
-        resPosts.forEach((post) => {
-            resUsers.forEach((user) => {
-                if (post.data().idUser === user.data().uid) {
-                    const newObj: AllPostsType = {
-                        usuario: user.data(),
-                        posts: post.data()
-                    }
+        const usersMap = new Map(users.map(user => [user.uid, user]));
 
-                    posts = [...posts, newObj]
-                }
-            })
-        })
-
-        return posts;
-    }
-
-    async getAllUsers(): Promise<DocumentData[] | []> {
-        if (!this.db) return [];
-
-        const refUsers = query(collection(this.db, 'usuarios'));
-        const resUsers = await getDocs(refUsers);
-
-        let users: DocumentData[] | [] = [];
-
-        resUsers.forEach((user) => users = [...users, user.data()])
-
-        return users;
+        return usersMap;
     }
 
     //agrega o actualiza comentarios o respuestas a la vez
@@ -224,15 +199,11 @@ class Firebase {
 
         if ((key === 'likes') && (currentData !== undefined && idCreator !== undefined)) {
             const creator = await this.getData('popularUsers', idCreator);
-            let newTotal = 0;
 
             if (creator) {
-                const currentTotalLikes = creator.totalLikesReceived;
-
-                if (currentTotalLikes > 0) newTotal = (currentTotalLikes - currentData) + newData.length;
-
-                if (currentTotalLikes === 0) newTotal = currentTotalLikes + newData.length;
-
+                const currentTotalLikes = creator.totalLikesReceived || 0;
+                const newTotal = currentTotalLikes > 0 ? (currentTotalLikes - currentData) + newData.length : newData.length;
+    
                 await updateDoc(doc(this.db, "popularUsers", idCreator), { totalLikesReceived: newTotal });
             }
         }
@@ -246,7 +217,7 @@ class Firebase {
         let img: string | null = null;
 
         //para subir una imagen nueva o reemplazarla del post
-        if (typeof imgUrl !== 'string' && imgUrl !== null) img = await this.uploadImg(`images/post/${idPost}`, imgUrl);
+        if (imgUrl && typeof imgUrl !== 'string') img = await this.uploadImg(`images/post/${idPost}`, imgUrl);
 
         //borrar imagen de un post
         if (deleteImg) await deleteObject(ref(this.storage, `images/post/${idPost}`));
@@ -254,7 +225,7 @@ class Firebase {
         await updateDoc(doc(this.db, "posts", idPost), {
             title,
             description,
-            imgUrl: img !== null ? img : imgUrl
+            imgUrl: img || imgUrl
         });
     }
 
@@ -286,9 +257,9 @@ class Firebase {
         const ref = query(collection(this.db, 'popularUsers'));
         const getData = await getDocs(ref);
 
-        const usersDB = await this.getAllUsers();
+        const usersMap= await this.getAllUsers();
 
-        const usersMap = new Map(usersDB.map(user => [user.uid, user]));
+        if(!usersMap) return [];
 
         const getAndOrderPopularUsers = getData.docs
             .map(doc => doc.data())
@@ -307,8 +278,8 @@ class Firebase {
 
         if(!getActivity) return [];
 
-        const usersDB = await this.getAllUsers();
-        const usersMap = new Map(usersDB.map(user => [user.uid, user]));
+        const usersMap = await this.getAllUsers();
+        if(!usersMap) return;
 
         const recentActivity = [...getActivity.users]
             .map((user) => usersMap.get(user))
@@ -320,10 +291,10 @@ class Firebase {
     async setRecentActivity(idCreator: string, uid: string, currentData: string[]) {
         if(!this.db) return;
 
-        let index = currentData.indexOf(idCreator);
+        let indexUser = currentData.indexOf(idCreator);
 
-        if(currentData.length === 5 && index === -1) currentData.pop();
-        if(index >= 0) currentData.splice(index, 1);
+        if(currentData.length === 5 && indexUser === -1) currentData.pop();
+        if(indexUser >= 0) currentData.splice(indexUser, 1);
 
         let newData = [idCreator, ...currentData];
 

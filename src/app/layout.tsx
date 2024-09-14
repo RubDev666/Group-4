@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-
 import { Providers } from "./providers";
-
 import { Header, GridLayout } from "../components/layouts";
 
 import '../styles/index.scss';
@@ -12,7 +10,7 @@ export const metadata: Metadata = {
 }; 
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-    //suppressHydrationWarning - elimina el error de la consola
+    //suppressHydrationWarning - remove error in the console
     return (
         <html lang="en" suppressHydrationWarning>
             <body className="text-font">
