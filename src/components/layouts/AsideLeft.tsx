@@ -39,7 +39,7 @@ export default function AsideLeft() {
     const fetchRecentActivity = async (uid: string) => {
         const getRecentActivity = await firebase.getRecentActivity(uid);
 
-        setRecentActivity(getRecentActivity);
+        setRecentActivity(getRecentActivity ? getRecentActivity : []);
     }
 
     return (
@@ -60,7 +60,7 @@ export default function AsideLeft() {
 
             <hr />
 
-            {recentActivity.length > 0 && (
+            {(recentActivity.length > 0 && user) && (
                 <>
                     <Accordion className='w-full text-color acordeon' defaultExpanded sx={{ backgroundColor: 'transparent', boxShadow: 'none', "::before": { display: 'none' } }}>
                         <AccordionSummary

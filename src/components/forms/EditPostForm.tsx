@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from "react-hook-form";
 
@@ -15,9 +15,11 @@ import type { PostProps } from "@/src/types/components-props";
 import firebase from '@/src/firebase/firebase';
 import { DocumentData } from "firebase/firestore";
 
+import { GlobalContext } from "@/src/app/providers";
+
 export default function EditPostForm({ idPost }: PostProps) {
     const [imgFile, setImgFile] = useState<File | undefined | string>(undefined)
-    const [loading, setLoading] = useState(true);
+    const [loadingPage, setLoadingPage] = useState(true);
     const [errorImg, setErrorImg] = useState<string>('');
     const [currentPost, setCurrentPost] = useState<DocumentData | null | undefined>(undefined);
 
@@ -26,15 +28,7 @@ export default function EditPostForm({ idPost }: PostProps) {
     const usuario = useAutenticacion();
     const router = useRouter();
 
-    //obtener el usuario actual autenticado
-    useEffect(() => {
-        if (usuario) setLoading(false);
-
-        //si no hay usuario igual detener la carga de la animacion
-        setTimeout(() => {
-            if (!usuario) setLoading(false);
-        }, 4000)
-    }, [usuario])
+    const {loading} = useContext(GlobalContext);
 
     useEffect(() => {
         const getPost = async () => {
@@ -43,6 +37,8 @@ export default function EditPostForm({ idPost }: PostProps) {
             setCurrentPost(res);
 
             if(res && res.imgUrl) setImgFile(res.imgUrl);
+
+            setLoadingPage(false);
         }
 
         getPost();
@@ -69,11 +65,10 @@ export default function EditPostForm({ idPost }: PostProps) {
         }
     }
 
-    //animacion mientras carga el usuario autenticado
-    if (loading && (!usuario || currentPost === undefined)) return <div className="w-full vh-100"><Spinner /></div>
+    if(loading) return <Spinner />;
 
     //si no hay usuarios nos redirecciona al inicio
-    if (!loading && (!usuario || currentPost === null)) router.push('/');
+    if (!loadingPage && (!usuario || currentPost === null)) router.push('/');
 
     if (usuario && currentPost) return (
         <div className="user-form-container">
