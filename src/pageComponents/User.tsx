@@ -37,8 +37,6 @@ export default function User({ userName }: UserProps) {
         if(!loading && allPosts.length === 0) setLoadingPageUser(false);
     }, [allPosts, userName, loading])
 
-    if(loading) return <Spinner />;
-
     if ((loadingPageUser && !user)) return null;
 
     return (

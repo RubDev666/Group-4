@@ -11,7 +11,6 @@ import { AvatarImg } from '../ui';
 
 import formatearFecha from '@/src/utilities/formatearFecha';
 
-import useAutenticacion from '@/src/hooks/useAuthUser';
 import firebase from '@/src/firebase/firebase';
 import PostOptions from './PostOptions';
 
@@ -24,9 +23,8 @@ export default function Post({ postData, creador }: PostComponentProps) {
 
     const path = usePathname();
     const router = useRouter();
-    const usuario = useAutenticacion();
 
-    const {setFormModal} = useContext(GlobalContext);
+    const {setFormModal, user} = useContext(GlobalContext);
 
     const totalComments = (): number => {
         let total: number = postData.comments.length ?? 0;
@@ -37,23 +35,23 @@ export default function Post({ postData, creador }: PostComponentProps) {
     }
 
     const likeToggle = async () => {
-        if (!usuario) return setFormModal(true);
+        if (!user) return setFormModal(true);
 
         const currentData = postData.likes;
 
         let newLikes: string[] | [] = [];
 
-        if (postData.likes.includes(usuario.uid)) {
-            newLikes = postData.likes.filter((uid: string) => uid !== usuario.uid);
+        if (postData.likes.includes(user.uid)) {
+            newLikes = postData.likes.filter((uid: string) => uid !== user.uid);
         } else {
-            newLikes = [usuario.uid, ...postData.likes];
+            newLikes = [user.uid, ...postData.likes];
         }
 
         try {
             postData.likes = newLikes;
             setCurrentLikes(newLikes.length);
 
-            if (usuario.uid !== postData.idUser) await firebase.handleRecentActivity(usuario.uid, postData.idUser);
+            if (user.uid !== postData.idUser) await firebase.handleRecentActivity(user.uid, postData.idUser);
 
             await firebase.updatePost({
                 idPost: postData.id,
@@ -98,7 +96,7 @@ export default function Post({ postData, creador }: PostComponentProps) {
                         <p className='time text-opacity relative'>{formatearFecha(postData.date)}</p>
                     </div>
 
-                    {(usuario && usuario.uid === creador.uid) && (
+                    {(user && user.uid === creador.uid) && (
                         <PostOptions idPost={postData.id} />
                     )}
                 </div>
@@ -129,7 +127,7 @@ export default function Post({ postData, creador }: PostComponentProps) {
 
                 <div className="actions-container w-full flex align-center justify-start">
                     <div className="relative like all-center pointer bg-hover-2" onClick={likeToggle}>
-                        {(usuario && postData.likes.includes(usuario.uid)) ? (
+                        {(user && postData.likes.includes(user.uid)) ? (
                             <Favorite className='icon primary-color' />
                         ) : (
                             <FavoriteBorder className='icon' />

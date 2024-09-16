@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -13,7 +13,6 @@ import { GlobalContext } from "@/src/app/providers";
 
 import formatearFecha from "@/src/utilities/formatearFecha";
 
-import useAutenticacion from "@/src/hooks/useAuthUser";
 import firebase from "@/src/firebase/firebase";
 
 import CommentOptions from "./CommentOptions";
@@ -23,11 +22,10 @@ import type { CommentProps } from "@/src/types/components-props";
 export default function Comment({ comentario, setComentarioId, currentPost, indexComment }: CommentProps) {
     const [edit, setEdit] = useState(false);
     const [comentarioEdit, setComentarioEdit] = useState<string>(comentario.comment);
-    const { allUsers, setFormModal } = useContext(GlobalContext);
+    const { allUsers, setFormModal, user } = useContext(GlobalContext);
 
     const [usuarioPost, setUsuarioPost] = useState<DocumentData | undefined>(undefined);
 
-    const usuario = useAutenticacion();
     const router = useRouter();
 
     useEffect(() => {
@@ -43,7 +41,7 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
     }, [allUsers, comentario])
  
     const likeToggle = async () => {
-        if (!usuario) {
+        if (!user) {
             setFormModal(true);
 
             return;
@@ -54,16 +52,16 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
 
         let newLikes: string[] | [] = [];
 
-        if (comentario.likes.includes(usuario.uid)) {
-            newLikes = comentario.likes.filter((uid: string) => uid !== usuario.uid);
+        if (comentario.likes.includes(user.uid)) {
+            newLikes = comentario.likes.filter((uid: string) => uid !== user.uid);
         } else {
-            newLikes = [usuario.uid, ...comentario.likes];
+            newLikes = [user.uid, ...comentario.likes];
         }
 
         try {
             currentPost.comments[indexComment].likes = newLikes;
 
-            if (usuario.uid !== currentPost.idUser) await firebase.handleRecentActivity(usuario.uid, currentPost.idUser);
+            if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
             await firebase.updatePost({
                 idPost: currentPost.id,
@@ -88,7 +86,7 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
             return;
         }
 
-        if(!usuario) return;
+        if(!user) return;
         if(comentarioEdit === '') return;
 
         const currentComment = comentario.comment;
@@ -96,7 +94,7 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
         try {
             currentPost.comments[indexComment].comment = comentarioEdit;
 
-            if (usuario.uid !== currentPost.idUser) await firebase.handleRecentActivity(usuario.uid, currentPost.idUser);
+            if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
             await firebase.updatePost({
                 idPost: currentPost.id,
@@ -135,7 +133,7 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
     }
 
     const replyBtn = () => {
-        if(!usuario) {
+        if(!user) {
             setFormModal(true);
 
             return;
@@ -163,7 +161,7 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
                             <p className='time text-opacity relative'>{formatearFecha(comentario.date)}</p>
                         </div>
 
-                        {usuario && comentario.idUser === usuario.uid && (
+                        {user && comentario.idUser === user.uid && (
                             <CommentOptions deleteF={deleteComm} setEdit={setEdit} />
                         )}
                     </div>
@@ -185,7 +183,7 @@ export default function Comment({ comentario, setComentarioId, currentPost, inde
                             {!edit && (
                                 <>
                                     <div className="relative like all-center pointer bg-hover" onClick={likeToggle}>
-                                        {(usuario && comentario.likes.includes(usuario.uid)) ? (
+                                        {(user && comentario.likes.includes(user.uid)) ? (
                                             <Favorite className='icon primary-color' />
                                         ) : (
                                             <FavoriteBorder className='icon' />

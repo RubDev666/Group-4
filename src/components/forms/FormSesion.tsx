@@ -5,30 +5,27 @@ import { useContext, useEffect, useState } from "react";
 
 import { GlobalContext } from "@/src/app/providers";
 import { FormLogin, FormRegister } from '@/src/components/forms';
-import useAutenticacion from "@/src/hooks/useAuthUser";
 
 import { Close } from "@mui/icons-material";
 
 export default function FormSesion() {
     const [formRegister, setFormRegister] = useState(false);
-    const { setFormModal } = useContext(GlobalContext);
+    const { setFormModal, user } = useContext(GlobalContext);
 
     const [exito, setExito] = useState(false);
     const [errorSubmit, setErrorSubmit] = useState<string>('')
 
-    const usuario = useAutenticacion();
-
     const router = useRouter();
 
     useEffect(() => {
-        if (exito && usuario) {
+        if (exito && user) {
             setExito(false);
 
             setFormModal(false);
 
-            router.push(`/u/${usuario.displayName}`);
+            router.push(`/u/${user.displayName}`);
         }
-    }, [exito, router, setFormModal, usuario])
+    }, [exito, router, setFormModal, user])
 
     const closeLoginModal = (e: React.MouseEvent<HTMLElement>): void => {
         const target = e.target as HTMLElement;

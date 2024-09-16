@@ -7,8 +7,6 @@ import { useState, useEffect, useContext } from "react";
 
 import { GlobalContext } from "@/src/app/providers";
 
-import useAutenticacion from "@/src/hooks/useAuthUser";
-
 import { Skeleton as SkeletonComponent, UserOptions } from "../ui";
 
 import { 
@@ -22,7 +20,7 @@ import {
 import firebase from "@/src/firebase/firebase";
 
 export default function Header() {
-    const { navModal, setNavModal, setFormModal, getPosts } = useContext(GlobalContext);
+    const { navModal, setNavModal, setFormModal, getPosts, user } = useContext(GlobalContext);
 
     const [mounted, setMounted] = useState(false);
     const [searchActive, setSearchActive] = useState(false);
@@ -31,8 +29,6 @@ export default function Header() {
     const { theme, setTheme } = useTheme();
 
     const pathname = usePathname();
-
-    const usuario = useAutenticacion();
 
     const notUserPage: boolean = (pathname.includes('/u/') || pathname.includes('/p/')) || pathname === '/';
 
@@ -48,19 +44,19 @@ export default function Header() {
 
     //obtener el usuario actual autenticado
     useEffect(() => {
-        if (usuario) {
-            handlePopular(usuario.uid);
+        if (user) {
+            handlePopular(user.uid);
 
             setLoading(false);
         }
 
         //si no hay usuario igual detener la carga de la animacion
         setTimeout(() => {
-            if (!usuario) setLoading(false);
+            if (!user) setLoading(false);
         }, 3000);
 
-        console.log(usuario);
-    }, [usuario])
+        console.log(user);
+    }, [user])
 
     useEffect(() => {
         setMounted(true);
@@ -144,14 +140,14 @@ export default function Header() {
                     />
                 )}
 
-                {((!usuario && !loading) && !searchActive) && (
+                {((!user && !loading) && !searchActive) && (
                     <button className="pointer" onClick={() => setFormModal(true)}>Iniciar Sesión</button>
                 )}
 
-                {(((usuario && !loading) && theme !== undefined) && !searchActive) && (
+                {(((user && !loading) && theme !== undefined) && !searchActive) && (
                     <UserOptions 
                         theme={theme}
-                        usuario={usuario}
+                        usuario={user}
                     />
                 )}
             </div>

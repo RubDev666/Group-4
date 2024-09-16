@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import Dropzone from "./Dropzone";
-import { Spinner, AvatarImg } from "../ui";
-
-import useAutenticacion from "@/src/hooks/useAuthUser";
+import { AvatarImg } from "../ui";
 
 import { UserFormType } from '@/src/types';
 import type { PostProps } from "@/src/types/components-props";
@@ -25,10 +23,9 @@ export default function EditPostForm({ idPost }: PostProps) {
 
     const { register, handleSubmit, formState: { errors }, watch } = useForm<UserFormType>();
 
-    const usuario = useAutenticacion();
     const router = useRouter();
 
-    const {loading} = useContext(GlobalContext);
+    const {user, setRefresh} = useContext(GlobalContext);
 
     useEffect(() => {
         const getPost = async () => {
@@ -42,7 +39,9 @@ export default function EditPostForm({ idPost }: PostProps) {
         }
 
         getPost();
-    }, [idPost]);
+
+        if (!loadingPage && (!user || currentPost === null)) router.push('/');
+    }, [idPost, loadingPage, currentPost, user]);
 
     const onSubmit: SubmitHandler<UserFormType> = async (data) => {
         try {
@@ -59,32 +58,27 @@ export default function EditPostForm({ idPost }: PostProps) {
                 deleteImg
             })
 
+            setRefresh(true);
+
             router.push('/p/' + idPost);
         } catch (error) {
             console.log(error);
         }
     }
 
-    if(loading) return <Spinner />;
-
-    //si no hay usuarios nos redirecciona al inicio
-    if (!loadingPage && (!usuario || currentPost === null)) router.push('/');
-
-    if (usuario && currentPost) return (
+    if (user && currentPost) return (
         <div className="user-form-container">
             <h3>Editar Post</h3>
 
             <div className="user-form">
                 <div className="header relative flex align-center justify-start">
-                    {usuario && (
-                        <AvatarImg
-                            size={30}
-                            fontSize={20}
-                            user={usuario}
-                        />
-                    )}
+                    <AvatarImg
+                        size={30}
+                        fontSize={20}
+                        user={user}
+                    />
 
-                    <span>{'u/' + usuario?.displayName} </span>
+                    <span>{'u/' + user?.displayName} </span>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)}>

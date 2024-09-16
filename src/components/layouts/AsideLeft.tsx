@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -21,19 +21,20 @@ import { IconTema, iconsTemas } from "@/src/utilities/asideLeftItems";
 import { AvatarImg } from "../ui";
 import { DocumentData } from "firebase/firestore";
 
-import useAutenticacion from "@/src/hooks/useAuthUser";
 import firebase from "@/src/firebase/firebase";
+import { GlobalContext } from "@/src/app/providers";
 
 export default function AsideLeft() {
     const [mostrar, setMostrar] = useState(false);
     const [recentActivity, setRecentActivity] = useState<DocumentData>([]);
 
     const path = usePathname();
-
-    const user = useAutenticacion();
+    
+    const { user } = useContext(GlobalContext);
 
     useEffect(() => {
         if(user) fetchRecentActivity(user.uid);
+        if(!user) setRecentActivity([]);
     }, [user])
 
     const fetchRecentActivity = async (uid: string) => {

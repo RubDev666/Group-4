@@ -13,7 +13,6 @@ import { GlobalContext } from "@/src/app/providers";
 import { AvatarImg } from "../ui";
 
 import formatearFecha from "@/src/utilities/formatearFecha";
-import useAutenticacion from "@/src/hooks/useAuthUser";
 import firebase from "@/src/firebase/firebase";
 import CommentOptions from "./CommentOptions";
 
@@ -22,10 +21,9 @@ import type { ReplyProps } from "@/src/types/components-props";
 export default function Reply({ respuesta, currentPost, indexComment }: ReplyProps) {
     const [edit, setEdit] = useState(false);
     const [comentarioEdit, setComentarioEdit] = useState<string>(respuesta.comment);
-    const { allUsers, setFormModal } = useContext(GlobalContext);
+    const { allUsers, setFormModal, user } = useContext(GlobalContext);
     const [usuarioReply, setUsuarioReply] = useState<DocumentData | undefined>(undefined);
 
-    const usuario = useAutenticacion();
     const router = useRouter();
 
     useEffect(() => {
@@ -41,7 +39,7 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPro
     }, [allUsers, respuesta])
 
     const likeToggle = async () => {
-        if (!usuario) {
+        if (!user) {
             setFormModal(true);
 
             return;
@@ -53,17 +51,17 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPro
         let newLikes: string[] | [] = [];
 
         //agregar o quitar like del usuario
-        if (respuesta.likes.includes(usuario.uid)) {
-            newLikes = respuesta.likes.filter((uid: string) => uid !== usuario.uid);
+        if (respuesta.likes.includes(user.uid)) {
+            newLikes = respuesta.likes.filter((uid: string) => uid !== user.uid);
         } else {
-            newLikes = [usuario.uid, ...respuesta.likes];
+            newLikes = [user.uid, ...respuesta.likes];
         }
 
         //esto es incorrecto, pero es la unica forma que encontre para poder cambiar los datos del state... originalmente hariamos una copia del arreglo de comentarios y sus respuestas para mandar esos datos a firebase antes de actualizar el state... sin embargo al copiar el arreglo  de comentarios en otra variable, por alguna extraña razon si modifico el nuevo arreglo modifica tambien el state... use todos los iteradores que existen, y multiples formas y sintaxis para no cambiar el arreglo del state, pero nada funciona...
         respuesta.likes = newLikes; //por eso modifico directamente este... por que modifica todo el "currentPost" del state de todas formas aunque copie o cree un nuevo arreglo en otra variable...
 
         try {
-            if (usuario.uid !== currentPost.idUser) await firebase.handleRecentActivity(usuario.uid, currentPost.idUser);
+            if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
             await firebase.updatePost({
                 idPost: currentPost.id,
@@ -89,7 +87,7 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPro
             return;
         }
 
-        if(!usuario) return;
+        if(!user) return;
 
         if (comentarioEdit === '') return;
 
@@ -98,7 +96,7 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPro
         try {
             currentPost.comments[indexComment].respuesta = comentarioEdit;
 
-            if (usuario.uid !== currentPost.idUser) await firebase.handleRecentActivity(usuario.uid, currentPost.idUser);
+            if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
             await firebase.updatePost({
                 idPost: currentPost.id,
@@ -155,7 +153,7 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPro
                             <p className='time text-opacity relative'>{formatearFecha(respuesta.date)}</p>
                         </div>
 
-                        {(usuario && usuario.uid === respuesta.idUser) && (
+                        {(user && user.uid === respuesta.idUser) && (
                             <CommentOptions deleteF={deleteComm} setEdit={setEdit} />
                         )}
                     </div>
@@ -176,7 +174,7 @@ export default function Reply({ respuesta, currentPost, indexComment }: ReplyPro
                         <div className="actions-container w-full flex align-center justify-start">
                             {!edit && (
                                 <div className="relative like all-center pointer bg-hover" onClick={likeToggle}>
-                                    {(usuario && respuesta.likes.includes(usuario.uid)) ? (
+                                    {(user && respuesta.likes.includes(user.uid)) ? (
                                         <Favorite className='icon primary-color' />
                                     ) : (
                                         <FavoriteBorder className='icon' />

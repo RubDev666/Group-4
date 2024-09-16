@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useContext } from "react";
 
-import { Spinner, NotFound } from "@/src/components/ui";
+import { NotFound } from "@/src/components/ui";
 import { Post as PostComponent, Comment, Reply } from "@/src/components/posts";
 import { FormComment } from "@/src/components/forms";
 import { DocumentData } from "firebase/firestore";
@@ -12,8 +12,6 @@ import firebase from "@/src/firebase/firebase";
 import type { AllPostsType } from "@/src/types";
 import type { PostProps } from "../types/components-props";
 
-import useAutenticacion from "@/src/hooks/useAuthUser";
-
 export default function Post({ idPost }: PostProps) {
     const [formComment, setFormComment] = useState(false);
     const [comentario, setComentario] = useState<string>('');
@@ -21,9 +19,7 @@ export default function Post({ idPost }: PostProps) {
     const [currentPost, setCurrentPost] = useState<AllPostsType | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const usuario = useAutenticacion();
-
-    const { allPosts, setFormModal, loading: firstload } = useContext(GlobalContext);
+    const { allPosts, setFormModal, user } = useContext(GlobalContext);
 
     useEffect(() => {
         const getPost = async () => {
@@ -56,7 +52,7 @@ export default function Post({ idPost }: PostProps) {
     }, [allPosts, idPost])
 
     const addCommentBtn = () => {
-        if(!usuario) {
+        if(!user) {
             setFormModal(true);
 
             return;
@@ -64,10 +60,6 @@ export default function Post({ idPost }: PostProps) {
 
         setFormComment(true)
     }
-
-    //if (loading) return <Spinner />
-
-    if(firstload) return <Spinner />;
 
     if(loading) return null;
 

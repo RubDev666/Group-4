@@ -1,18 +1,17 @@
-import { Dispatch, SetStateAction, ChangeEvent } from "react";
+import {ChangeEvent, useContext } from "react";
 
 import { CommentTypes, ReplyTypes } from "@/src/types";
 import { DocumentData } from "firebase/firestore";
 
 import { v4 as generateId } from 'uuid';
 
-import useAutenticacion from "@/src/hooks/useAuthUser";
-
 import firebase from "@/src/firebase/firebase";
 
 import type { FormCommentProps } from "@/src/types/components-props";
+import { GlobalContext } from "@/src/app/providers";
 
 export default function FormComment({ post, setFormComment, comentario, setComentario, isReplyForm, setComentarioId, indexComment }: FormCommentProps) {
-    const usuario = useAutenticacion();
+    const {user} = useContext(GlobalContext);
 
     const submitComment = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,21 +20,21 @@ export default function FormComment({ post, setFormComment, comentario, setComen
         let currentData;
 
         if (comentario === '') return;
-        if (!usuario) return;
+        if (!user) return;
 
         try {
-            if (usuario.uid !== post.idUser) await firebase.handleRecentActivity(usuario.uid, post.idUser);
+            if (user.uid !== post.idUser) await firebase.handleRecentActivity(user.uid, post.idUser);
 
             if (!isReplyForm) {
                 currentData = post.comments;
 
-                await createComment(usuario);
+                await createComment(user);
             }
 
             if (isReplyForm && indexComment !== undefined) {
                 currentData = post.comments[indexComment].respuestas;
 
-                await createReply(usuario, indexComment);
+                await createReply(user, indexComment);
             }
 
             //en dado caso que no se borre lo escrito en el formulario, usar este codigo

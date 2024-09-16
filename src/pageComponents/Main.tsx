@@ -2,7 +2,6 @@
 
 import { useContext } from 'react';
 
-import { Spinner } from '../components/ui';
 import { Post } from '../components/posts';
 
 import { AllPostsType } from '@/src/types';
@@ -10,13 +9,7 @@ import { AllPostsType } from '@/src/types';
 import { GlobalContext } from '@/src/app/providers';
 
 export default function Main() {
-    const { allPosts, loading } = useContext(GlobalContext);
-
-    if (loading) return (
-        <div className="main-container w-full">
-            <Spinner />
-        </div>
-    )
+    const { allPosts } = useContext(GlobalContext);
 
     if (!allPosts || allPosts.length === 0) {
         return (

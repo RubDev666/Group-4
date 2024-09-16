@@ -5,6 +5,8 @@ import { useState, useEffect, createContext } from 'react';
 import { AllPostsType, AllUsersFetch, GlobalContextType } from '../types';
 import firebase from '../firebase/firebase';
 import { DocumentData } from 'firebase/firestore';
+import useAutenticacion from '../hooks/useAuthUser';
+import { User } from 'firebase/auth';
 
 const defaultValues: GlobalContextType = {
     navModal: false,
@@ -18,6 +20,7 @@ const defaultValues: GlobalContextType = {
     popularUsers: [],
     loadingPopular: true,
     setRefresh: () => {},
+    user: null
 };
  
 export const GlobalContext = createContext<GlobalContextType>(defaultValues); 
@@ -35,8 +38,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const [allPosts, setAllPosts] = useState<AllPostsType[]>([]);
     const [allUsers, setAllUsers] = useState<AllUsersFetch>(null);
 
+    const [user, setUser] = useState<User | null>(null)
+
     //when the user edits their profile
     const [refresh, setRefresh] = useState(false);
+
+    const getCurrentUser = useAutenticacion();
+
+    useEffect(() => {
+        setUser(getCurrentUser);
+    }, [getCurrentUser])
 
     useEffect(() => {
         const fetchData = async () => {
@@ -105,6 +116,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     popularUsers,
                     loadingPopular,
                     setRefresh,
+                    user
                 }}
             >
                 {children}

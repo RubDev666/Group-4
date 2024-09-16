@@ -9,9 +9,10 @@ import AsideLeft from "./AsideLeft";
 import ImgHero from "./ImgHero";
 import AsideRight from "./AsideRight";
 import FormSesion from "../forms/FormSesion";
+import { Spinner } from "../ui";
  
 export default function GridLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-    const {setNavModal} = useContext(GlobalContext);
+    const {setNavModal, loading} = useContext(GlobalContext);
 
     const path = usePathname();
 
@@ -26,7 +27,13 @@ export default function GridLayout({ children }: Readonly<{ children: React.Reac
             {path === '/' && <ImgHero />}
 
             <main>
-                {children}
+                {loading ? (
+                    <Spinner />
+                ): (
+                    <>
+                        {children}
+                    </>
+                )}
             </main>
 
             <AsideRight />

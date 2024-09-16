@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import Dropzone from "./Dropzone";
-import { Spinner, AvatarImg } from "../ui";
-
-import useAutenticacion from "@/src/hooks/useAuthUser";
+import { AvatarImg } from "../ui";
 
 import { UserFormType } from '@/src/types';
 import type { TypeOfFormProps } from "@/src/types/components-props";
@@ -29,25 +27,18 @@ const FormActions = {
 
 export default function UserForm({ typeForm }: TypeOfFormProps) {
     const [imgFile, setImgFile] = useState<File | undefined | string>(undefined)
-    const [loading, setLoading] = useState(true);
     const [errorImg, setErrorImg] = useState<string>('');
 
     const { register, handleSubmit, formState: { errors }, watch } = useForm<UserFormType>();
 
-    const {setRefresh, loading: firstload} = useContext(GlobalContext);
+    const {setRefresh, loading: firstload, user} = useContext(GlobalContext);
 
-    const usuario = useAutenticacion();
     const router = useRouter();
 
-    //obtener el usuario actual autenticado
+    //obtener el user actual autenticado
     useEffect(() => {
-        if (usuario) setLoading(false);
-
-        //si no hay usuario igual detener la carga de la animacion
-        setTimeout(() => {
-            if (!usuario) setLoading(false);
-        }, 4000)
-    }, [usuario])
+        if(!user && !firstload) router.push('/');
+    }, [firstload, user])
 
     const onSubmit: SubmitHandler<UserFormType> = async (data) => {
         //jamas sera string, solo que como usamos el mismo state para el otro formulario, por eso lo pongo...
@@ -57,16 +48,16 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
             //debido a que el componente es reutilizable por eso el monton de validaciones dependiendo el caso de uso.
 
             if (typeForm === 'editProfile') {
-                if (imgFile && usuario) {
-                    await firebase.updateProfileImg(imgFile, usuario);
+                if (imgFile && user) {
+                    await firebase.updateProfileImg(imgFile, user);
 
                     setRefresh(true);
 
-                    if (data.name === '') router.push('/u/' + usuario.displayName);
+                    if (data.name === '') router.push('/u/' + user.displayName);
                 }
 
-                if (data.name !== '' && usuario) {
-                    await firebase.updateUserName(data.name.replace(/ /g, ""), usuario);
+                if (data.name !== '' && user) {
+                    await firebase.updateUserName(data.name.replace(/ /g, ""), user);
 
                     setRefresh(true);
 
@@ -74,15 +65,17 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
                 }
             }
 
-            if (typeForm === 'createPost' && usuario) {
+            if (typeForm === 'createPost' && user) {
                 const { title, description } = data;
 
                 const idNewPost = await firebase.createPost({
                     title,
                     description,
                     imgFile,
-                    user: usuario
+                    user
                 });
+
+                setRefresh(true);
 
                 router.push('/p/' + idNewPost);
             }
@@ -91,32 +84,22 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
         }
     }
 
-    //animacion mientras carga el usuario autenticado
-    //if (loading && !usuario) return <div className="w-full"><Spinner /></div>;
+    if (firstload && !user) return null;
 
-    if(firstload) return <Spinner />; 
-
-    if (loading && !usuario) return null;
-
-    //si no hay usuarios nos redirecciona al inicio
-    if (!loading && !usuario) router.push('/');
-
-    if (usuario) return (
+    if (user) return (
         <div className="user-form-container">
             <h3>{FormActions[typeForm].titleForm}</h3>
 
             <div className="user-form">
                 {typeForm === 'createPost' && (
                     <div className="header relative flex align-center justify-start">
-                        {usuario && (
-                            <AvatarImg
-                                size={30}
-                                fontSize={20}
-                                user={usuario}
-                            />
-                        )}
+                        <AvatarImg
+                            size={30}
+                            fontSize={20}
+                            user={user}
+                        />
 
-                        <span>{'u/' + usuario?.displayName} </span>
+                        <span>{'u/' + user?.displayName} </span>
                     </div>
                 )}
 
@@ -124,13 +107,13 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
                     <div className="inputs-container w-full relative">
                         {typeForm === 'editProfile' && (
                             <>
-                                <p className={`${errors.name ? 'error' : ''}`}>Tu nombre actual: <span className='primary-color'>{usuario?.displayName}</span></p>
+                                <p className={`${errors.name ? 'error' : ''}`}>Tu nombre actual: <span className='primary-color'>{user?.displayName}</span></p>
 
                                 <input
                                     className="bg-input"
                                     type="text"
                                     autoComplete='off'
-                                    placeholder="Tu nuevo nombre de usuario"
+                                    placeholder="Tu nuevo nombre de user"
                                     {...register('name', {
                                         required: false,
                                         minLength: {

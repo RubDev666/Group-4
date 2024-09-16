@@ -13,6 +13,7 @@ export interface GlobalContextType {
     popularUsers: DocumentData[];
     loadingPopular: boolean;
     setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+    user: User | null;
 }
 
 export type RegisterType = {
