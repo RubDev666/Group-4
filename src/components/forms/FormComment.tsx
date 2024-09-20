@@ -1,93 +1,51 @@
-import {ChangeEvent, useContext } from "react";
-
-import { CommentTypes, ReplyTypes } from "@/src/types";
-import { DocumentData } from "firebase/firestore";
+import { ChangeEvent, useContext } from "react";
 
 import { v4 as generateId } from 'uuid';
 
 import firebase from "@/src/firebase/firebase";
 
+import type { CommentTypes, ReplyTypes } from "@/src/types";
 import type { FormCommentProps } from "@/src/types/components-props";
+
 import { GlobalContext } from "@/src/app/providers";
 
-export default function FormComment({ post, setFormComment, comentario, setComentario, isReplyForm, setComentarioId, indexComment }: FormCommentProps) {
-    const {user} = useContext(GlobalContext);
+export default function FormComment({ post, comentario, setComentario, isReplyForm, indexComment, resetFormComment }: FormCommentProps) {
+    const {user, setAllPosts, allPosts} = useContext(GlobalContext);
 
     const submitComment = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        //debido a un error que me pasa al clonar el state en otra variable, si modifico la nueva variable tambien se modifica el state original, y no tengo idea del por que... asi que para solucionarlo y ya que todas formas se modifica aunque no quiera, guardo los datos previos en esta variable, y si hay error en la base de datos usamos esta variable para volverlo a su estado original y asi no moestrarlo en el cliente...
-        let currentData;
-
-        if (comentario === '') return;
-        if (!user) return;
+        if (comentario === '' || !user) return;
 
         try {
             if (user.uid !== post.idUser) await firebase.handleRecentActivity(user.uid, post.idUser);
 
-            if (!isReplyForm) {
-                currentData = post.comments;
-
-                await createComment(user);
+            let newComment: CommentTypes | ReplyTypes = {
+                id: generateId(),
+                idUser: user.uid,
+                date: Date.now(),
+                likes: [],
+                comment: comentario,
             }
 
-            if (isReplyForm && indexComment !== undefined) {
-                currentData = post.comments[indexComment].respuestas;
+            let currentComments: CommentTypes[] = JSON.parse(JSON.stringify(post.comments));
 
-                await createReply(user, indexComment);
+            if(!isReplyForm) {
+                newComment = {...newComment, respuestas: []};
+
+                currentComments = [newComment, ...currentComments];
             }
 
-            //en dado caso que no se borre lo escrito en el formulario, usar este codigo
-            /*const text = document.querySelector(`${isReplyForm ? '#form-respuestas' : '#form-comentarios'}`) as HTMLTextAreaElement;
-            text.value = '';*/
+            if(isReplyForm && indexComment !== undefined) currentComments[indexComment].respuestas = [newComment, ...currentComments[indexComment].respuestas]; 
 
-            reset();
+            await firebase.updatePost({ idPost: post.id, key: 'comments', newData: currentComments});
+
+            const updatePosts = allPosts.map(data => data.posts.id === post.id ? { ...data, posts: { ...data.posts, comments: currentComments } } : data );
+
+            setAllPosts(updatePosts);
         } catch (error) {
-            //console.log(error);
-            
-            //resetear los valores predeterminados si no se pudo actualizar en la base de datos, ya que si no hago esto, se mostraran los comentarios o respuestas aun si no se guarda en la base de datos...
-
-            if (!isReplyForm) post.comments = currentData;
-            if (isReplyForm && indexComment !== undefined) post.comments[indexComment].respuestas = currentData;
+            console.log(error);
         }
-    }
-
-    const createComment = async (usuario: DocumentData) => {
-        const newComment: CommentTypes = {
-            id: generateId(),
-            idUser: usuario.uid,
-            date: Date.now(),
-            likes: [],
-            comment: comentario,
-            respuestas: []
-        }
-
-        //NO ES CORRECTO MODIFICAR EL ESTATE DE ESTA FORMA, PERO NO ENCONTRE OTRA FORMA DE COPIAR EL STATE SIN QUE MODIFIQUE IGUAL EL STATE ORIGINAL...
-        post.comments = [newComment, ...post.comments];
-
-        await firebase.updatePost({ idPost: post.id, key: 'comments', newData: post.comments });
-    }
-
-    const createReply = async (usuario: DocumentData, i: number) => {
-        const newReply: ReplyTypes = {
-            id: generateId(),
-            idUser: usuario.uid,
-            date: Date.now(),
-            likes: [],
-            comment: comentario,
-        }
-
-        //NO ES CORRECTO MODIFICAR EL ESTATE DE ESTA FORMA, PERO NO ENCONTRE OTRA FORMA DE COPIAR EL STATE SIN QUE MODIFIQUE IGUAL EL STATE ORIGINAL...
-        post.comments[i].respuestas = [newReply, ...post.comments[i].respuestas];
-
-        await firebase.updatePost({ idPost: post.id, key: 'comments', newData: post.comments });
-    }
-
-    const reset = () => {
-        if (setFormComment) setFormComment(false);
-        if (setComentarioId) setComentarioId('');
-
-        setComentario('');
     }
 
     return (
@@ -104,7 +62,7 @@ export default function FormComment({ post, setFormComment, comentario, setComen
             />
  
             <div className="actions-form-container w-full flex align-center">
-                <button className="cancel-btn pointer bg-hover-2" type="reset" onClick={reset}>Cancelar</button>
+                <button className="cancel-btn pointer bg-hover-2" type="reset" onClick={resetFormComment}>Cancelar</button>
 
                 <button className="comentar-btn pointer" type="submit">{`${isReplyForm ? 'Responder' : 'Comentar'}`}</button>
             </div>

@@ -26,7 +26,7 @@ const FormActions = {
 }
 
 export default function UserForm({ typeForm }: TypeOfFormProps) {
-    const [imgFile, setImgFile] = useState<File | undefined | string>(undefined)
+    const [imgFile, setImgFile] = useState<File | null | string>(null)
     const [errorImg, setErrorImg] = useState<string>('');
 
     const { register, handleSubmit, formState: { errors }, watch } = useForm<UserFormType>();
@@ -35,49 +35,46 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
 
     const router = useRouter();
 
-    //obtener el user actual autenticado
     useEffect(() => {
         if(!user && !firstload) router.push('/');
     }, [firstload, user])
 
     const onSubmit: SubmitHandler<UserFormType> = async (data) => {
         //jamas sera string, solo que como usamos el mismo state para el otro formulario, por eso lo pongo...
-        if(typeof imgFile === 'string') return;
+        if(typeof imgFile === 'string' || !user) return;
 
         try {
-            //debido a que el componente es reutilizable por eso el monton de validaciones dependiendo el caso de uso.
+            switch (typeForm) {
+                case 'editProfile': {
+                    if (imgFile) {
+                        await firebase.updateProfileImg(imgFile, user);
+    
+                        if (data.name === '') setRefresh({refresh: true, redirectTo: '/u/' + user.displayName})
+                    }
 
-            if (typeForm === 'editProfile') {
-                if (imgFile && user) {
-                    await firebase.updateProfileImg(imgFile, user);
+                    if (data.name !== '') {
+                        await firebase.updateUserName(data.name.replace(/ /g, ""), user);
 
-                    setRefresh(true);
+                        setRefresh({refresh: true, redirectTo: '/u/' + data.name.replace(/ /g, "")})
+                    }
 
-                    if (data.name === '') router.push('/u/' + user.displayName);
+                    break;
                 }
+                case 'createPost': {
+                    const { title, description } = data;
 
-                if (data.name !== '' && user) {
-                    await firebase.updateUserName(data.name.replace(/ /g, ""), user);
+                    const idNewPost = await firebase.createPost({
+                        title,
+                        description,
+                        imgFile,
+                        user
+                    });
 
-                    setRefresh(true);
+                    setRefresh({refresh: true, redirectTo: '/p/' + idNewPost});
 
-                    router.push('/u/' + data.name.replace(/ /g, ""));
-                }
-            }
-
-            if (typeForm === 'createPost' && user) {
-                const { title, description } = data;
-
-                const idNewPost = await firebase.createPost({
-                    title,
-                    description,
-                    imgFile,
-                    user
-                });
-
-                setRefresh(true);
-
-                router.push('/p/' + idNewPost);
+                    break;
+                } 
+                default: break;
             }
         } catch (error) {
             console.log(error)
@@ -197,7 +194,7 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
                             />
 
                             {imgFile && (
-                                <button className="bg-hover-2 pointer" onClick={() => setImgFile(undefined)}>Replace / Cancel</button>
+                                <button className="bg-hover-2 pointer" onClick={() => setImgFile(null)}>Replace / Cancel</button>
                             )}
                         </div>
 

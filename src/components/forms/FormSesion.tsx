@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 
 import { GlobalContext } from "@/src/app/providers";
@@ -10,22 +9,20 @@ import { Close } from "@mui/icons-material";
 
 export default function FormSesion() {
     const [formRegister, setFormRegister] = useState(false);
-    const { setFormModal, user } = useContext(GlobalContext);
+    const { setFormModal, user, setRefresh } = useContext(GlobalContext);
 
     const [exito, setExito] = useState(false);
     const [errorSubmit, setErrorSubmit] = useState<string>('')
-
-    const router = useRouter();
 
     useEffect(() => {
         if (exito && user) {
             setExito(false);
 
-            setFormModal(false);
+            setRefresh({refresh: true, redirectTo: `/u/${user.displayName}`})
 
-            router.push(`/u/${user.displayName}`);
+            setFormModal(false);
         }
-    }, [exito, router, setFormModal, user])
+    }, [exito, setFormModal, user])
 
     const closeLoginModal = (e: React.MouseEvent<HTMLElement>): void => {
         const target = e.target as HTMLElement;

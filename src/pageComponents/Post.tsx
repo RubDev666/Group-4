@@ -3,12 +3,12 @@
 import { useEffect, useState, useContext } from "react";
 
 import { NotFound } from "@/src/components/ui";
-import { Post as PostComponent, Comment, Reply } from "@/src/components/posts";
+import { Post as PostComponent, CommentsContainer } from "@/src/components/posts";
 import { FormComment } from "@/src/components/forms";
-import { DocumentData } from "firebase/firestore";
 
 import { GlobalContext } from "@/src/app/providers";
-import firebase from "@/src/firebase/firebase";
+
+import { DocumentData } from "firebase/firestore";
 import type { AllPostsType } from "@/src/types";
 import type { PostProps } from "../types/components-props";
 
@@ -17,116 +17,74 @@ export default function Post({ idPost }: PostProps) {
     const [comentario, setComentario] = useState<string>('');
     const [comentarioId, setComentarioId] = useState<string>('');
     const [currentPost, setCurrentPost] = useState<AllPostsType | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loadingPage, setLoadingPage] = useState(true);
 
     const { allPosts, setFormModal, user } = useContext(GlobalContext);
 
     useEffect(() => {
-        const getPost = async () => {
-            if (allPosts.length > 0) {
+        const loadingPost = allPosts.find(post => post.posts.id === idPost);
 
-                const verfiedDB = await firebase.getData('posts', idPost);
-
-                if (!verfiedDB) {
-                    setLoading(false);
-
-                    return;
-                }
-
-                let loadingPost: AllPostsType | null = null;
-
-                for(const post of allPosts) {
-                    if (post.posts.id === idPost) {
-                        loadingPost = post;
-
-                        break;
-                    }
-                }
-
-                setCurrentPost(loadingPost);
-                setLoading(false);
-            }
-        }
-
-        getPost();
+        setCurrentPost(loadingPost ? loadingPost : null);
+        setLoadingPage(false);
     }, [allPosts, idPost])
 
-    const addCommentBtn = () => {
-        if(!user) {
-            setFormModal(true);
+    useEffect(() => {
+        resetFormComment();
+    }, [currentPost])
 
-            return;
-        }
-
-        setFormComment(true)
+    const resetFormComment = () => {
+        setFormComment(false);
+        setComentarioId('');
+        setComentario('');
     }
 
-    if(loading) return null;
+    const addCommentBtn = () => !user ? setFormModal(true) : setFormComment(true);
 
-    return (
-        <>
-            {(currentPost && !loading) ? (
-                <div className="main-container w-full">
-                    <PostComponent
-                        postData={currentPost.posts}
-                        creador={currentPost.usuario}
+    if(!currentPost && !loadingPage) return <NotFound message="Publicacion no encontrada o eliminada" />
+
+    if (currentPost) return (
+        <div className="main-container w-full">
+            <PostComponent
+                postData={currentPost.posts}
+                creador={currentPost.usuario}
+            />
+
+            <section className="comentarios-section w-full">
+                {!formComment && <button onClick={addCommentBtn} className="btn-add-comment all-center pointer border-color"><span className="all-center">+</span> Añadir comentario</button>}
+
+                {formComment && (
+                    <FormComment
+                        post={currentPost.posts}
+                        comentario={comentario}
+                        setComentario={setComentario}
+                        isReplyForm={false}
+                        resetFormComment={resetFormComment}
                     />
+                )}
 
-                    <section className="comentarios-section w-full">
-                        {!formComment && <button onClick={addCommentBtn} className="btn-add-comment all-center pointer border-color"><span className="all-center">+</span> Añadir comentario</button>}
+                <div className="comentarios">
+                    {currentPost.posts.comments.map((comentarioPost: DocumentData, indexComment: number) => (
+                        <CommentsContainer
+                            key={comentarioPost.id}
+                            comentarioDoc={comentarioPost}
+                            setComentarioId={setComentarioId}
+                            currentPost={currentPost.posts}
+                            indexComment={indexComment}
+                            comentario={comentario}
+                            setComentario={setComentario}
+                            comentarioId={comentarioId}
+                            resetFormComment={resetFormComment}
+                        />
+                    ))}
 
-                        {formComment && (
-                            <FormComment
-                                post={currentPost.posts}
-                                setFormComment={setFormComment}
-                                comentario={comentario}
-                                setComentario={setComentario}
-                                isReplyForm={false}
-                            />
-                        )}
-
-                        <div className="comentarios">
-                            {currentPost.posts.comments.length > 0 ? (
-                                <>
-                                    {currentPost.posts.comments.map((comentarioPost: DocumentData, indexComment: number) => (
-                                        <div key={comentarioPost.id} className="comentario-main-container w-full">
-                                            <Comment 
-                                                comentario={comentarioPost} 
-                                                setComentarioId={setComentarioId}
-                                                currentPost={currentPost.posts}
-                                                indexComment={indexComment}
-                                            />
-
-                                            {comentarioId === comentarioPost.id && (
-                                                <div className={`formulario-container w-full ${comentarioPost.respuestas.length > 0 && 'reply-true'}`}>
-                                                    <FormComment
-                                                        post={currentPost.posts}
-                                                        setComentarioId={setComentarioId}
-                                                        comentario={comentario}
-                                                        setComentario={setComentario}
-                                                        comentarioId={comentarioId}
-                                                        isReplyForm={true}
-                                                        indexComment={indexComment}
-                                                    />
-                                                </div>
-                                            )}
- 
-                                            {comentarioPost.respuestas.length > 0 && comentarioPost.respuestas.map((res: DocumentData, indexReply: number) => <Reply key={res.id} respuesta={res} currentPost={currentPost.posts} indexComment={indexComment} />)}
-                                        </div>
-                                    ))}
-                                </>
-                            ) : (
-                                <div className="no-comentarios">
-                                    <h4>Se la primera persona en comentar</h4>
-                                    <p>Di lo que piensas y da inicio a esta conversacion</p>
-                                </div>
-                            )}
+                    {currentPost.posts.comments.length === 0 && (
+                        <div className="no-comentarios">
+                            <h4>Se la primera persona en comentar</h4>
+                            <p>Di lo que piensas y da inicio a esta conversacion</p>
                         </div>
-                    </section>
+                    )}
                 </div>
-            ) : (
-                <NotFound message="Publicacion no encontrada o eliminada" />
-            )}
-        </>
+            </section>
+        </div>
     )
 }

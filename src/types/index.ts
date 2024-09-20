@@ -7,13 +7,14 @@ export interface GlobalContextType {
     setNavModal: React.Dispatch<React.SetStateAction<boolean>>;
     setFormModal: React.Dispatch<React.SetStateAction<boolean>>;
     allPosts: AllPostsType[];
+    setAllPosts: React.Dispatch<React.SetStateAction<AllPostsType[]>>;
     allUsers: AllUsersFetch;
-    getPosts: () => Promise<void>;
     loading: boolean;
     popularUsers: DocumentData[];
     loadingPopular: boolean;
-    setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+    setRefresh: React.Dispatch<React.SetStateAction<{refresh: boolean, redirectTo: string}>>;
     user: User | null;
+    fetchError: boolean;
 }
 
 export type RegisterType = {
@@ -65,7 +66,7 @@ export interface PostTypes extends GlobalTypesPost, MainPostProperties {
 }
 
 export type CreatePostArg = MainPostProperties & {
-    imgFile: File | undefined;
+    imgFile: File | null;
     user: User;
 }
 

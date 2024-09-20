@@ -2,13 +2,13 @@
 
 import { useEffect, useState, useContext } from "react";
 
-import { NotFound, Spinner, AvatarImg } from "@/src/components/ui";
+import { NotFound, AvatarImg } from "@/src/components/ui";
 import { Post } from "../components/posts";
 
-import { DocumentData } from "firebase/firestore";
-
 import { GlobalContext } from "@/src/app/providers";
-import type { AllPostsType, AllUsersFetch } from "@/src/types";
+
+import type { DocumentData } from "firebase/firestore";
+import type { AllPostsType } from "@/src/types";
 import type { UserProps } from "../types/components-props";
  
 import firebase from "@/src/firebase/firebase";
@@ -37,40 +37,36 @@ export default function User({ userName }: UserProps) {
         if(!loading && allPosts.length === 0) setLoadingPageUser(false);
     }, [allPosts, userName, loading])
 
-    if ((loadingPageUser && !user)) return null;
+    if (loadingPageUser && !user) return null;
 
-    return (
-        <>
-            {(user) ? (
-                <div className="user-main-container w-full">
-                    <div className="img-name-container flex justify-start align-center">
-                        <AvatarImg 
-                            size={100}
-                            fontSize={70}
-                            user={user}
-                        />
+    if(!loadingPageUser && !user) return <NotFound message="Usuario no encontrado" />;
 
-                        <h4>{'u/' + user.displayName}</h4>
-                    </div>
+    if(!loadingPageUser && user) return (
+        <div className="user-main-container w-full">
+            <div className="img-name-container flex justify-start align-center">
+                <AvatarImg
+                    size={100}
+                    fontSize={70}
+                    user={user}
+                />
 
-                    <p>{'Miembro desde el: ' + user.dateRegister}</p>
+                <h4>{'u/' + user.displayName}</h4>
+            </div>
 
-                    <hr />
+            <p>{'Miembro desde el: ' + user.dateRegister}</p>
 
-                    {posts.length > 0 ? (
-                        <h5>{'Publicaciones de u/' + user.displayName}</h5>
+            <hr />
 
-                    ) : (
-                        <h5>{'u/' + user.displayName + ' aun no ha publicado nada'}</h5>
-                    )}
+            {posts.length > 0 ? (
+                <h5>{'Publicaciones de u/' + user.displayName}</h5>
 
-                    {posts.map((post: AllPostsType) => (
-                        <Post key={post.posts.id} postData={post.posts} creador={post.usuario} />
-                    ))}
-                </div>
             ) : (
-                <NotFound message="Usuario no encontrado" />
+                <h5>{'u/' + user.displayName + ' aun no ha publicado nada'}</h5>
             )}
-        </>
+
+            {posts.map((post: AllPostsType) => (
+                <Post key={post.posts.id} postData={post.posts} creador={post.usuario} />
+            ))}
+        </div>
     )
 }

@@ -27,7 +27,7 @@ export default function PostOptions({idPost}: PostProps) {
     const path = usePathname();
     const router = useRouter();
 
-    const {getPosts} = useContext(GlobalContext);
+    const {setRefresh, user} = useContext(GlobalContext);
 
     useEffect(() => {
         setMounted(true);
@@ -40,15 +40,16 @@ export default function PostOptions({idPost}: PostProps) {
     const editPost = () => router.push('/edit-post/' + idPost);
 
     const deletePost = async () => {
+        if(!user) return;
+
         try {
             await firebase.deletePost(idPost);
-
-            await getPosts();
+            await firebase.createPopularUser(user.uid);
 
             if(path.includes('/p/')) {
-                router.push('/');
+                setRefresh({refresh: true, redirectTo: '/'});
             } else {
-                router.refresh();  
+                setRefresh({refresh: true, redirectTo: ''});  
             }
         } catch (error) {
             console.log(error);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -19,54 +19,42 @@ import { GlobalContext } from "@/src/app/providers";
 import type { PostComponentProps } from '@/src/types/components-props';
 
 export default function Post({ postData, creador }: PostComponentProps) {
-    const [currentLikes, setCurrentLikes] = useState<number>(postData.likes.length);
-
     const path = usePathname();
     const router = useRouter();
 
-    const {setFormModal, user} = useContext(GlobalContext);
+    const {setFormModal, user, setAllPosts, allPosts} = useContext(GlobalContext);
 
-    const totalComments = (): number => {
-        let total: number = postData.comments.length ?? 0;
-
-        for (let comment of postData.comments) total = total + comment.respuestas.length;
-
-        return total;
-    }
+    const totalComments = (): number => postData.comments.reduce((total: number, comment: any) => total + (comment.respuestas.length || 0), postData.comments.length);
 
     const likeToggle = async () => {
         if (!user) return setFormModal(true);
 
-        const currentData = postData.likes;
+        const currentPosts = [...allPosts];
 
-        let newLikes: string[] | [] = [];
+        let newPost = JSON.parse(JSON.stringify(postData));
 
-        if (postData.likes.includes(user.uid)) {
-            newLikes = postData.likes.filter((uid: string) => uid !== user.uid);
-        } else {
-            newLikes = [user.uid, ...postData.likes];
-        }
+        let currentLikes: string[] = JSON.parse(JSON.stringify(postData.likes));
+
+        newPost.likes = currentLikes.includes(user.uid) ? currentLikes.filter(uid => uid !== user.uid) : [user.uid, ...currentLikes];
+
+        const updatePosts = allPosts.map(data => data.posts.id === postData.id ? { ...data, posts: newPost } : data);
 
         try {
-            postData.likes = newLikes;
-            setCurrentLikes(newLikes.length);
+            setAllPosts(updatePosts);
 
             if (user.uid !== postData.idUser) await firebase.handleRecentActivity(user.uid, postData.idUser);
 
             await firebase.updatePost({
                 idPost: postData.id,
                 idCreator: postData.idUser,
-                currentData: currentData.length,
+                currentData: currentLikes.length,
                 key: 'likes',
-                newData: newLikes
+                newData: newPost.likes
             });
-
-            //router.refresh();
         } catch (error) {
-            postData.likes = currentData;
-            setCurrentLikes(currentData.length);
+            console.log(error);
 
-            //router.refresh();
+            setAllPosts(currentPosts);
         }
     }
 
@@ -133,7 +121,7 @@ export default function Post({ postData, creador }: PostComponentProps) {
                             <FavoriteBorder className='icon' />
                         )}
 
-                        <span>{currentLikes}</span>
+                        <span>{postData.likes.length.toString()}</span>
                     </div>
 
                     <div className="relative comment all-center pointer bg-hover-2" onClick={redirectPost}>

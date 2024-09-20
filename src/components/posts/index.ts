@@ -1,13 +1,15 @@
-import Comment from "./Comment";
+import CommentsContainer from "./CommentsContainer";
 import CommentOptions from "./CommentOptions";
 import Post from "./Post";
 import PostOptions from "./PostOptions";
 import Reply from "./Reply";
+import Comment from "./Comment";
 
 export {
-    Comment,
+    CommentsContainer,
     CommentOptions,
     Post,
     PostOptions,
-    Reply
+    Reply,
+    Comment
 }

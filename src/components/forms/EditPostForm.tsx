@@ -16,51 +16,45 @@ import { DocumentData } from "firebase/firestore";
 import { GlobalContext } from "@/src/app/providers";
 
 export default function EditPostForm({ idPost }: PostProps) {
-    const [imgFile, setImgFile] = useState<File | undefined | string>(undefined)
+    const [imgFile, setImgFile] = useState<File | null | string>(null)
     const [loadingPage, setLoadingPage] = useState(true);
     const [errorImg, setErrorImg] = useState<string>('');
-    const [currentPost, setCurrentPost] = useState<DocumentData | null | undefined>(undefined);
+    const [currentPost, setCurrentPost] = useState<DocumentData | undefined>(undefined);
 
     const { register, handleSubmit, formState: { errors }, watch } = useForm<UserFormType>();
 
     const router = useRouter();
 
-    const {user, setRefresh} = useContext(GlobalContext);
+    const {user, setRefresh, allPosts, loading} = useContext(GlobalContext);
 
     useEffect(() => {
-        const getPost = async () => {
-            const res = await firebase.getData('posts', idPost);
+        if(!loading && loadingPage) {
+            const getPost = allPosts.find(data => data.posts.id === idPost);
 
-            setCurrentPost(res);
-
-            if(res && res.imgUrl) setImgFile(res.imgUrl);
+            if (getPost) {
+                setCurrentPost(getPost.posts);
+                setImgFile(getPost.posts.imgUrl);
+            }
 
             setLoadingPage(false);
         }
 
-        getPost();
-
-        if (!loadingPage && (!user || currentPost === null)) router.push('/');
-    }, [idPost, loadingPage, currentPost, user]);
+        if (!loadingPage && (!user || !currentPost)) router.push('/');
+    }, [loadingPage, loading, user]);
 
     const onSubmit: SubmitHandler<UserFormType> = async (data) => {
         try {
             if(!currentPost) return;
 
-            //si el usuario remueve la imagen original de su post
-            const deleteImg: boolean = imgFile === undefined && currentPost.imgUrl !== null;
-
             await firebase.editPost({
                 title: data.title,
                 description: data.description,
-                imgUrl: imgFile === undefined ? null : imgFile,
+                imgUrl: imgFile,
                 idPost,
-                deleteImg
+                deleteImg: !imgFile && currentPost.imgUrl
             })
 
-            setRefresh(true);
-
-            router.push('/p/' + idPost);
+            setRefresh({refresh: true, redirectTo: '/p/' + idPost});
         } catch (error) {
             console.log(error);
         }
@@ -103,9 +97,7 @@ export default function EditPostForm({ idPost }: PostProps) {
                             })}
                         />
 
-                        {errors.title && (
-                            <span className="error-input">{errors.title.message}</span>
-                        )}
+                        {errors.title && <span className="error-input">{errors.title.message}</span>}
 
                         <div className="relative">
                             <p>Descripcion:</p>
@@ -127,9 +119,7 @@ export default function EditPostForm({ idPost }: PostProps) {
                                 placeholder="Descripcion del post"
                             />
 
-                            {errors.description && (
-                                <span className="error-input">{errors.description.message}</span>
-                            )}
+                            {errors.description && <span className="error-input">{errors.description.message}</span>}
                         </div>
 
                         <div className="dropzone-main-container relative">
@@ -142,15 +132,13 @@ export default function EditPostForm({ idPost }: PostProps) {
                                 errorImg={errorImg}
                             />
 
-                            {imgFile && (
-                                <button className="bg-hover-2 pointer" onClick={() => setImgFile(undefined)}>Replace / Cancel</button>
-                            )}
+                            {imgFile && <button className="bg-hover-2 pointer" onClick={() => setImgFile(null)}>Replace / Cancel</button>}
                         </div>
 
                         <div className="actions-post">
                             <button className="w-full create-btn pointer" type="submit">Actualizar Publicacion</button>
 
-                            <button className="w-full calcel-btn bg-hover-2 pointer" onClick={() => router.push('/')}>Cancelar</button>
+                            <button className="w-full calcel-btn bg-hover-2 pointer" onClick={() => router.push('/')} type="button">Cancelar</button>
                         </div>
                     </div>
                 </form>

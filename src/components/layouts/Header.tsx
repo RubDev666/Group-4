@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useTheme } from 'next-themes';
-import { usePathname } from "next/navigation";
 import { useState, useEffect, useContext } from "react";
 
 import { GlobalContext } from "@/src/app/providers";
@@ -20,47 +19,30 @@ import {
 import firebase from "@/src/firebase/firebase";
 
 export default function Header() {
-    const { navModal, setNavModal, setFormModal, getPosts, user } = useContext(GlobalContext);
-
     const [mounted, setMounted] = useState(false);
     const [searchActive, setSearchActive] = useState(false);
-    const [loading, setLoading] = useState(true);
 
     const { theme, setTheme } = useTheme();
 
-    const pathname = usePathname();
-
-    const notUserPage: boolean = (pathname.includes('/u/') || pathname.includes('/p/')) || pathname === '/';
+    const { navModal, setNavModal, setFormModal, user, loading } = useContext(GlobalContext);
 
     useEffect(() => {
         window.addEventListener('resize', (e: UIEvent) => {
             if (innerWidth >= 1024) {
-                if (notUserPage) setNavModal(false);
-
+                setNavModal(false);
                 setSearchActive(false);
             }
         })
-    })
 
-    //obtener el usuario actual autenticado
+        setMounted(true);
+    }, [])
+
+    //get auth user
     useEffect(() => {
-        if (user) {
-            handlePopular(user.uid);
-
-            setLoading(false);
-        }
-
-        //si no hay usuario igual detener la carga de la animacion
-        setTimeout(() => {
-            if (!user) setLoading(false);
-        }, 3000);
+        if (user)  handlePopular(user.uid);
 
         console.log(user);
     }, [user])
-
-    useEffect(() => {
-        setMounted(true);
-    }, []); 
 
     const handlePopular = async (uid: string) => {
         const getPopulars = await firebase.getData('popularUsers', uid);
@@ -72,30 +54,26 @@ export default function Header() {
 
     const toggleSearch = () => {
         setSearchActive(!searchActive);
-        if (notUserPage) setNavModal(false);
+        setNavModal(false);
     }
 
     const select = () => document.querySelector('HEADER FORM')?.classList.add('shadow');
 
     const blur = () => document.querySelector('HEADER FORM')?.classList.remove('shadow');
 
-    const reloadedData = () => {
-        if(pathname === '/') getPosts();
-    }
-
     return (
         <header className='flex align-center border-bottom bg-color w-full'>
             {!searchActive && (
                 <div className='all-center'>
                     {!navModal ? (
-                        (notUserPage && <MenuIcon onClick={toggleMenu} className="icon pointer" />)
+                        <MenuIcon onClick={toggleMenu} className="icon pointer" />
                     ) : (
-                        (notUserPage && <Close onClick={toggleMenu} className="icon pointer" />)
+                        <Close onClick={toggleMenu} className="icon pointer" />
                     )}
 
                     <Link href='/' className="logo-mobile logo-font pointer"><span>4</span></Link>
 
-                    <Link href='/' className="logo-desktop logo-font pointer" onClick={reloadedData}>Group <span>4</span></Link>
+                    <Link href='/' className="logo-desktop logo-font pointer">Group <span>4</span></Link>
                 </div>
             )}
 

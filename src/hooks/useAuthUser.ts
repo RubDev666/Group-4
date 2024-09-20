@@ -1,5 +1,3 @@
-//esta es la unica forma en la que funciona el "onAuthStateChanged";
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -15,13 +13,7 @@ function useAutenticacion() {
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        const unsuscribe = onAuthStateChanged(auth, (user) => {
-            if( user ) {
-                guardarUsuarioAutenticado(user);
-            } else {
-                guardarUsuarioAutenticado(null);
-            }
-        })
+        const unsuscribe = onAuthStateChanged(auth, (user) => guardarUsuarioAutenticado(user));
 
         return () => unsuscribe();
     }, []);

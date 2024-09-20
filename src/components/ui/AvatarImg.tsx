@@ -1,5 +1,3 @@
-import { DocumentData } from "firebase/firestore";
-
 import { Avatar } from "@mui/material";
 
 import type { AvatarProps } from "@/src/types/components-props";

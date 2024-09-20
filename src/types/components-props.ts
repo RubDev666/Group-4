@@ -4,21 +4,20 @@ import { User } from "firebase/auth";
 
 //====================== COMPONENTS > forms ========== 
 export type DZProps = {
-    getImg: Dispatch<SetStateAction<File | undefined | string>>;
-    img: File | undefined | string;
+    getImg: Dispatch<SetStateAction<File | null | string>>;
+    img: File | null | string;
     setErrorImg: Dispatch<SetStateAction<string>>;
     errorImg: string;
 }
 
 export type FormCommentProps = {
     post: DocumentData;
-    setFormComment?: Dispatch<SetStateAction<boolean>>;
     comentario: string;
     setComentario: Dispatch<SetStateAction<string>>;
     isReplyForm: boolean;
     comentarioId?: string;
-    setComentarioId?: Dispatch<SetStateAction<string>>;
     indexComment?: number;
+    resetFormComment: () => void;
 }
 
 export type FormsSessionProps = {
@@ -36,11 +35,15 @@ export type TypeOfFormProps = {
 }
 
 //================ COMPONENTS > posts =========
-export type CommentProps = {
-    comentario: DocumentData;
+export type CommentsContainerProps = Pick<FormCommentProps, 'comentario' | 'setComentario' | 'comentarioId' | 'resetFormComment'> & {
+    comentarioDoc: DocumentData;
     setComentarioId: Dispatch<SetStateAction<string>>;
     currentPost: DocumentData;
     indexComment: number;
+}
+
+export type CommentProps = Pick<CommentsContainerProps, 'comentarioDoc' | 'setComentarioId' | 'currentPost' | 'indexComment'> & {
+    userPost: DocumentData;
 }
 
 export type CommentOptionsProps = {
@@ -57,6 +60,7 @@ export type ReplyProps = {
     respuesta: DocumentData;
     currentPost: DocumentData;
     indexComment: number;
+    indexReply: number;
 }
 
 //================ COMPONENTS > ui =========

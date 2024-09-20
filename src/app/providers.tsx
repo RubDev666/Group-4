@@ -1,12 +1,16 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, createContext } from 'react';
+
 import { AllPostsType, AllUsersFetch, GlobalContextType } from '../types';
-import firebase from '../firebase/firebase';
+
 import { DocumentData } from 'firebase/firestore';
-import useAutenticacion from '../hooks/useAuthUser';
 import { User } from 'firebase/auth';
+
+import firebase from '../firebase/firebase';
+import useAutenticacion from '../hooks/useAuthUser';
 
 const defaultValues: GlobalContextType = {
     navModal: false,
@@ -14,20 +18,21 @@ const defaultValues: GlobalContextType = {
     setNavModal: () => {},
     setFormModal: () => {},
     allPosts: [],
+    setAllPosts: () => {},
     allUsers: null,
-    getPosts: async () => {},
     loading: true,
     popularUsers: [],
     loadingPopular: true,
     setRefresh: () => {},
-    user: null
+    user: null,
+    fetchError: false
 };
- 
+
 export const GlobalContext = createContext<GlobalContextType>(defaultValues); 
 
 //el codigo original llevaba esto, pero era un ejemplo con tailwind
 //<ThemeProvider attribute="class" defaultTheme='system' enableSystem>
- 
+
 export function Providers({ children }: { children: React.ReactNode }) {
     const [navModal, setNavModal] = useState(false);
     const [formModal, setFormModal] = useState(false);
@@ -37,13 +42,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const [popularUsers, setPopularUsers] = useState<DocumentData[]>([]);
     const [allPosts, setAllPosts] = useState<AllPostsType[]>([]);
     const [allUsers, setAllUsers] = useState<AllUsersFetch>(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [fetchError, setFetchError] = useState(false);
 
-    const [user, setUser] = useState<User | null>(null)
-
-    //when the user edits their profile
-    const [refresh, setRefresh] = useState(false);
+    //when the user edits their profile, or another fetch actions
+    const [refresh, setRefresh] = useState({refresh: false, redirectTo: ''});
 
     const getCurrentUser = useAutenticacion();
+
+    const router = useRouter();
 
     useEffect(() => {
         setUser(getCurrentUser);
@@ -51,20 +58,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const fetchData = async () => {
-            await getPosts();
-            await getPopulars();
+            await handleFetch();
         };
     
         fetchData();
     }, []);
     
     useEffect(() => {
-        if (refresh) {
+        if (refresh.refresh) {
             const refreshData = async () => {
-                await getPosts();
-                await getPopulars();
+                await handleFetch();
 
-                setRefresh(false);
+                setRefresh({...refresh, refresh: false});
+                    
+                if(refresh.redirectTo !== '') router.push(refresh.redirectTo);
             };
     
             refreshData();
@@ -78,13 +85,26 @@ export function Providers({ children }: { children: React.ReactNode }) {
         setLoadingPopular(false);
     }
 
-    const getPosts = async () => {
+    const getData = async () => {
         const res = await firebase.getAllPosts();
         const users = await firebase.getAllUsers();
         
         setAllPosts(res);
         setAllUsers(users);
         setLoadingData(false);
+    }
+
+    const handleFetch = async () => {
+        try {
+            await getData();
+            await getPopulars();
+        } catch (error) {
+            console.log(error);
+
+            setFetchError(true);
+            setLoadingData(false);
+            setLoadingPopular(false);
+        }
     }
 
     useEffect(() => {
@@ -110,13 +130,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     setNavModal, 
                     setFormModal,
                     allPosts,
+                    setAllPosts,
                     allUsers,
-                    getPosts,
                     loading: loadingData,
                     popularUsers,
                     loadingPopular,
                     setRefresh,
-                    user
+                    user,
+                    fetchError
                 }}
             >
                 {children}

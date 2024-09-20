@@ -40,7 +40,7 @@ export default function AsideRight() {
                         </>
                     )}
 
-                    {!loadingPopular && (
+                    {(!loadingPopular && popularUsers.length > 0) && (
                         <>
                             {popularUsers.map((user: DocumentData) => (
                                 <Link key={user.uid} href={`/u/${user.displayName}`} className="flex align-center justify-start text-color w-full bg-hover">

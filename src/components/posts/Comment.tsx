@@ -1,13 +1,9 @@
 'use client';
 
-import { ChangeEvent, useContext, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { FavoriteBorder, ChatBubbleOutline, Favorite } from '@mui/icons-material';
-import { DocumentData } from "firebase/firestore";
-
-import { AvatarImg } from "../ui";
 
 import { GlobalContext } from "@/src/app/providers";
 
@@ -15,202 +11,194 @@ import formatearFecha from "@/src/utilities/formatearFecha";
 
 import firebase from "@/src/firebase/firebase";
 
+import { AvatarImg } from "../ui";
 import CommentOptions from "./CommentOptions";
 
 import type { CommentProps } from "@/src/types/components-props";
+import type { DocumentData } from "firebase/firestore";
 
-export default function Comment({ comentario, setComentarioId, currentPost, indexComment }: CommentProps) {
+export default function Comment({comentarioDoc, setComentarioId, currentPost, indexComment, userPost}: CommentProps) {
     const [edit, setEdit] = useState(false);
-    const [comentarioEdit, setComentarioEdit] = useState<string>(comentario.comment);
-    const { allUsers, setFormModal, user } = useContext(GlobalContext);
+    const [comentarioEdit, setComentarioEdit] = useState<string>(comentarioDoc.comment);
 
-    const [usuarioPost, setUsuarioPost] = useState<DocumentData | undefined>(undefined);
+    const { setFormModal, user, allPosts, setAllPosts } = useContext(GlobalContext);
 
-    const router = useRouter();
-
-    useEffect(() => {
-        const getUserPost = () => {
-            if (allUsers) {
-                const getUser = allUsers.get(comentario.idUser);
-
-                setUsuarioPost(getUser);
-            }
-        }
-
-        getUserPost();
-    }, [allUsers, comentario])
- 
     const likeToggle = async () => {
-        if (!user) {
-            setFormModal(true);
+        if (!user) return setFormModal(true);
 
-            return;
-        }
-
-        //guardar los datos actuales en caso de error...
-        const currentData = comentario.likes;
-
-        let newLikes: string[] | [] = [];
-
-        if (comentario.likes.includes(user.uid)) {
-            newLikes = comentario.likes.filter((uid: string) => uid !== user.uid);
-        } else {
-            newLikes = [user.uid, ...comentario.likes];
-        }
+        const {updatePosts, currentPosts, newPost} = handleCurrentData('like');
 
         try {
-            currentPost.comments[indexComment].likes = newLikes;
+            setAllPosts(updatePosts);
 
             if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
             await firebase.updatePost({
                 idPost: currentPost.id,
                 key: 'comments',
-                newData: currentPost.comments
+                newData: newPost.comments
             });
-
-            router.refresh();
         } catch (error) {
-            //console.log(error);
+            console.log(error);
 
-            currentPost.comments[indexComment].likes = currentData;
-
-            router.refresh();
+            setAllPosts(currentPosts);
         }
     }
 
     const saveEditComment = async () => {
-        if(comentarioEdit === comentario.comment) {
-            setEdit(false);
+        if(comentarioEdit === comentarioDoc.comment) return setEdit(false);
+        if(!user || comentarioEdit === '') return;
 
-            return;
-        }
-
-        if(!user) return;
-        if(comentarioEdit === '') return;
-
-        const currentComment = comentario.comment;
-
+        const {updatePosts, currentPosts, newPost} = handleCurrentData('editComment');
+        
         try {
-            currentPost.comments[indexComment].comment = comentarioEdit;
-
+            setAllPosts(updatePosts);
+            
             if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
             await firebase.updatePost({
                 idPost: currentPost.id,
                 key: 'comments',
-                newData: currentPost.comments
+                newData: newPost.comments
             });
-
-            comentario.comment = comentarioEdit;
 
             setEdit(false);
         } catch (error) {
-            comentario.comment = currentComment;
+            console.log(error);
+
+            setAllPosts(currentPosts);
         }
     }
 
     const deleteComm = async () => {
-        const currentComment = currentPost.comments;
+        const {updatePosts, currentPosts, newPost} = handleCurrentData('deleteComment');
 
         try {
-            currentPost.comments = currentPost.comments.filter((com: DocumentData) => com.id !== comentario.id);
-
             await firebase.updatePost({
                 idPost: currentPost.id,
                 key: 'comments',
-                newData: currentPost.comments
+                newData: newPost.comments
             });
 
-            router.refresh();
+            setAllPosts(updatePosts);
         } catch (error) {
-            console.log('no se borro')
+            console.log(error);
 
-            currentPost.comments = currentComment;
+            setAllPosts(currentPosts);
+        }
+    }
 
-            router.refresh();
+    const handleCurrentData = (type: 'like' | 'deleteComment' | 'editComment') => {
+        const currentPosts = [...allPosts];
+
+        let newPost = JSON.parse(JSON.stringify(currentPost));
+
+        switch (type) {
+            case 'like': {
+                if(user) {
+                    let currentLikes: string[] = JSON.parse(JSON.stringify(comentarioDoc.likes));
+
+                    newPost.comments[indexComment].likes = currentLikes.includes(user.uid) ? currentLikes.filter(uid => uid !== user.uid) : [user.uid, ...currentLikes];
+                }
+
+                break;
+            }
+            case 'editComment': {
+                newPost.comments[indexComment].comment = comentarioEdit;
+
+                break;
+            }
+            case 'deleteComment': {
+                let currentComments = JSON.parse(JSON.stringify(currentPost.comments));
+
+                newPost.comments = currentComments.filter((com: DocumentData) => com.id !== comentarioDoc.id);   
+
+                break;
+            }
+
+            default: break;
+        }
+
+        const updatePosts = allPosts.map(data => data.posts.id === currentPost.id ? { ...data, posts: newPost } : data);
+
+        return {
+            currentPosts,
+            updatePosts,
+            newPost
         }
     }
 
     const replyBtn = () => {
-        if(!user) {
-            setFormModal(true);
+        if(!user) return setFormModal(true);
 
-            return;
-        }
-
-        setComentarioId(comentario.id)
+        setComentarioId(comentarioDoc.id)
     }
 
     return (
         <div className="comentario-container relative w-full">
-            {usuarioPost && (
-                <>
-                    <div className="header-comentario relative flex justify-between">
-                        <div className='flex info-creator'>
-                            <Link href={`/u/${usuarioPost.displayName}`} className="user text-color flex align-center">
-                                <AvatarImg
-                                    size={30}
-                                    fontSize={16}
-                                    user={usuarioPost}
-                                />
+            <div className="header-comentario relative flex justify-between">
+                <div className='flex info-creator'>
+                    <Link href={`/u/${userPost.displayName}`} className="user text-color flex align-center">
+                        <AvatarImg
+                            size={30}
+                            fontSize={16}
+                            user={userPost}
+                        />
 
-                                <span className='user-name'>{`u/${usuarioPost.displayName}`} </span>
-                            </Link>
+                        <span className='user-name'>{`u/${userPost.displayName}`} </span>
+                    </Link>
 
-                            <p className='time text-opacity relative'>{formatearFecha(comentario.date)}</p>
-                        </div>
+                    <p className='time text-opacity relative'>{formatearFecha(comentarioDoc.date)}</p>
+                </div>
 
-                        {user && comentario.idUser === user.uid && (
-                            <CommentOptions deleteF={deleteComm} setEdit={setEdit} />
-                        )}
-                    </div>
+                {(user && comentarioDoc.idUser === user.uid) && (
+                    <CommentOptions deleteF={deleteComm} setEdit={setEdit} />
+                )}
+            </div>
 
-                    <div className={`comentario ${comentario.respuestas.length === 0 && 'unique'}`}>
-                        {!edit && <p>{comentario.comment}</p>}
+            <div className={`comentario ${comentarioDoc.respuestas.length === 0 && 'unique'}`}>
+                {!edit && <p>{comentarioDoc.comment}</p>}
 
-                        {edit && (
-                            <textarea
-                                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setComentarioEdit(e.target.value)}
-                                name='edit-comentario'
-                                id='edit-comentario'
-                                className="w-full scroll-bar-style"
-                                defaultValue={comentario.comment}
-                            />
-                        )}
+                {edit && (
+                    <textarea
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setComentarioEdit(e.target.value)}
+                        name='edit-comentario'
+                        id='edit-comentario'
+                        className="w-full scroll-bar-style"
+                        defaultValue={comentarioDoc.comment}
+                    />
+                )}
 
-                        <div className="actions-container w-full flex align-center justify-start">
-                            {!edit && (
-                                <>
-                                    <div className="relative like all-center pointer bg-hover" onClick={likeToggle}>
-                                        {(user && comentario.likes.includes(user.uid)) ? (
-                                            <Favorite className='icon primary-color' />
-                                        ) : (
-                                            <FavoriteBorder className='icon' />
-                                        )}
+                <div className="actions-container w-full flex align-center justify-start">
+                    {!edit && (
+                        <>
+                            <div className="relative like all-center pointer bg-hover" onClick={likeToggle}>
+                                {(user && comentarioDoc.likes.includes(user.uid)) ? (
+                                    <Favorite className='icon primary-color' />
+                                ) : (
+                                    <FavoriteBorder className='icon' />
+                                )}
 
-                                        <span>{comentario.likes.length.toString()}</span>
-                                    </div>
+                                <span>{comentarioDoc.likes.length.toString()}</span>
+                            </div>
 
-                                    <div className="relative comment all-center pointer bg-hover" onClick={replyBtn}>
-                                        <ChatBubbleOutline className='icon' />
+                            <div className="relative comment all-center pointer bg-hover" onClick={replyBtn}>
+                                <ChatBubbleOutline className='icon' />
 
-                                        <span>Responder</span>
-                                    </div>
-                                </>
-                            )}
+                                <span>Responder</span>
+                            </div>
+                        </>
+                    )}
 
-                            {edit && (
-                                <>
-                                    <button className="cancel-btn pointer bg-hover-2" onClick={() => setEdit(false)}>Cancelar</button>
+                    {edit && (
+                        <>
+                            <button className="cancel-btn pointer bg-hover-2" onClick={() => setEdit(false)}>Cancelar</button>
 
-                                    <button className="comentar-btn pointer" onClick={saveEditComment}>Editar</button>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </>
-            )}
+                            <button className="comentar-btn pointer" onClick={saveEditComment}>Editar</button>
+                        </>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }
