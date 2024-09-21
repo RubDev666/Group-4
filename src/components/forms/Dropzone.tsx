@@ -24,26 +24,24 @@ export default function Dropzone({ getImg, img, setErrorImg, errorImg }: DZProps
             //changeDrop(acceptedFiles[0])
             getImg(acceptedFiles[0]);
 
-            //codigo clave e importante para mostrar imagen previsualizada al usuario, solo es obtener el archivo del input y luego pasarlo a esta url y luego colocarlo en etiqueta de imagen y listo!!!!!
+            //important code to show a preview image to the user, just get the input file and then pass it to this url and then place it in the image tag and that's it!!!!!
             const url = URL.createObjectURL(acceptedFiles[0]);
 
             setPreviewImg(url);
             setErrorImg('');
         }
-        //subirArchivo(formData, acceptedFiles[0].path);
     }, [getImg, setErrorImg]);
 
-    //determinar el tamaño maximo de la imagen
     const maxSize = true ? 1000000000000 : 1000000;
 
-    // Extraer contenido de Dropzone
+    //extract Dropzone content
     const {
         fileRejections,
         getRootProps,
         getInputProps,
-        isDragActive, //para saber si se esta arrastrando un archivo
+        isDragActive,
         acceptedFiles
-    } = useDropzone({ onDropAccepted, onDropRejected, accept: { 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }, maxSize }); //argumentos para el hook
+    } = useDropzone({ onDropAccepted, onDropRejected, accept: { 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }, maxSize });
 
     return (
         <div className="dropzone-container w-full bg-input">
@@ -57,14 +55,14 @@ export default function Dropzone({ getImg, img, setErrorImg, errorImg }: DZProps
                         <Image
                             src={img}
                             fill
-                            alt="img-prueba"
+                            alt="img-preview"
                             priority
                         />
                     ) : (
                         <Image
                             src={previewImg}
                             fill
-                            alt="img-prueba"
+                            alt="img-preview"
                             priority
                         />
                     )}
@@ -74,10 +72,10 @@ export default function Dropzone({ getImg, img, setErrorImg, errorImg }: DZProps
                     <input {...getInputProps()} />
 
                     {isDragActive ? (
-                        <p>Suelta la imagen para subir</p>
+                        <p>Drop image to upload</p>
                     ) : (
                         <div className="instructions-container">
-                            <p>Arrastra y suelta una imagen o haz click aqui para elegir una</p>
+                            <p>Drag and drop an image or click here to choose one</p>
 
                             <Collections className="icon" />
                         </div>

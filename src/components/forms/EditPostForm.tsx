@@ -25,10 +25,10 @@ export default function EditPostForm({ idPost }: PostProps) {
 
     const router = useRouter();
 
-    const {user, setRefresh, allPosts, loading} = useContext(GlobalContext);
+    const {user, setRefresh, allPosts, loadingData} = useContext(GlobalContext);
 
     useEffect(() => {
-        if(!loading && loadingPage) {
+        if(!loadingData && loadingPage) {
             const getPost = allPosts.find(data => data.posts.id === idPost);
 
             if (getPost) {
@@ -40,7 +40,7 @@ export default function EditPostForm({ idPost }: PostProps) {
         }
 
         if (!loadingPage && (!user || !currentPost)) router.push('/');
-    }, [loadingPage, loading, user]);
+    }, [loadingPage, loadingData, user]);
 
     const onSubmit: SubmitHandler<UserFormType> = async (data) => {
         try {
@@ -62,7 +62,7 @@ export default function EditPostForm({ idPost }: PostProps) {
 
     if (user && currentPost) return (
         <div className="user-form-container">
-            <h3>Editar Post</h3>
+            <h3>Edit post</h3>
 
             <div className="user-form">
                 <div className="header relative flex align-center justify-start">
@@ -77,22 +77,22 @@ export default function EditPostForm({ idPost }: PostProps) {
 
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="inputs-container w-full relative">
-                        <p>Titulo:</p>
+                        <p>Title:</p>
 
                         <input
                             className="bg-input"
                             type="text"
                             id="title-post"
-                            placeholder="Titulo del post"
+                            placeholder="Post title"
                             {...register('title', {
                                 value: currentPost.title,
                                 required: {
                                     value: true,
-                                    message: 'Titulo obligatorio*'
+                                    message: 'required*'
                                 },
                                 maxLength: {
                                     value: 60,
-                                    message: 'Maximo 60 caracteres*'
+                                    message: 'Max. 60 chars.*'
                                 }
                             })}
                         />
@@ -100,30 +100,30 @@ export default function EditPostForm({ idPost }: PostProps) {
                         {errors.title && <span className="error-input">{errors.title.message}</span>}
 
                         <div className="relative">
-                            <p>Descripcion:</p>
+                            <p>Description:</p>
 
                             <textarea
                                 {...register("description", {
                                     value: currentPost.description,
                                     required: {
                                         value: true,
-                                        message: 'Descripcion obligatoria*'
+                                        message: 'required*'
                                     },
                                     maxLength: {
                                         value: 300,
-                                        message: 'Maximo 300 caracteres*'
+                                        message: 'Max. 300 chars.*'
                                     }
                                 })}
                                 className="w-full bg-input"
                                 id="description-post"
-                                placeholder="Descripcion del post"
+                                placeholder="Post description"
                             />
 
                             {errors.description && <span className="error-input">{errors.description.message}</span>}
                         </div>
 
                         <div className="dropzone-main-container relative">
-                            <p className={`${errorImg !== '' ? 'error' : ''}`}>{'Elige/cambia tu foto:'}</p>
+                            <p className={`${errorImg !== '' ? 'error' : ''}`}>{'Choose/change your photo:'}</p>
 
                             <Dropzone
                                 getImg={setImgFile}
@@ -136,9 +136,9 @@ export default function EditPostForm({ idPost }: PostProps) {
                         </div>
 
                         <div className="actions-post">
-                            <button className="w-full create-btn pointer" type="submit">Actualizar Publicacion</button>
+                            <button className="w-full create-btn pointer" type="submit">Update post</button>
 
-                            <button className="w-full calcel-btn bg-hover-2 pointer" onClick={() => router.push('/')} type="button">Cancelar</button>
+                            <button className="w-full calcel-btn bg-hover-2 pointer" onClick={() => router.push('/')} type="button">Cancel</button>
                         </div>
                     </div>
                 </form>

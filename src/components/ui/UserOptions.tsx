@@ -25,7 +25,7 @@ import themeColors from "@/src/utilities/themeColors";
 
 import type { UserOptionsProps } from "@/src/types/components-props";
 
-//este es solo si queremos modificar el tooltip acorde al tema del usuario
+//This is only if we want to modify the tooltip according to the user's theme
 interface ColoresProps extends TooltipProps {
     themeMode?: string;
 }
@@ -43,7 +43,7 @@ const CustomTooltip = styled(({ className, themeMode, ...props }: ColoresProps) 
     },
 }));
 
-export default function UserOptions({ theme, usuario }: UserOptionsProps) {
+export default function UserOptions({ theme, user }: UserOptionsProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -53,12 +53,12 @@ export default function UserOptions({ theme, usuario }: UserOptionsProps) {
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
 
-    const logout = async () => await firebase.cerrarSesion();
+    const logout = async () => await firebase.logOut();
 
     return (
         <>
             <CustomTooltip
-                title="Ver opciones del perfil"
+                title="See profile options"
                 themeMode={theme}
             >
                 <IconButton
@@ -72,7 +72,7 @@ export default function UserOptions({ theme, usuario }: UserOptionsProps) {
                     <AvatarImg
                         size={32}
                         fontSize={20}
-                        user={usuario}
+                        user={user}
                     />
                 </IconButton>
             </CustomTooltip>
@@ -116,14 +116,14 @@ export default function UserOptions({ theme, usuario }: UserOptionsProps) {
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-                <MenuItem onClick={() => router.push(`/u/${usuario.displayName}`)} sx={menuItemHover}>
+                <MenuItem onClick={() => router.push(`/u/${user.displayName}`)} sx={menuItemHover}>
                     <AvatarImg
                         size={32}
                         fontSize={20}
-                        user={usuario}
+                        user={user}
                     />
 
-                    {'u/' + usuario.displayName}
+                    {'u/' + user.displayName}
                 </MenuItem>
 
                 <Divider />
@@ -132,21 +132,21 @@ export default function UserOptions({ theme, usuario }: UserOptionsProps) {
                     <ListItemIcon>
                         <Create className="primary-color" fontSize="small" />
                     </ListItemIcon>
-                    Crear publicacion
+                    Create post
                 </MenuItem>
 
                 <MenuItem onClick={() => router.push('/edit-profile')} sx={menuItemHover}>
                     <ListItemIcon>
                         <Settings className="primary-color" fontSize="small" />
                     </ListItemIcon>
-                    Editar perfil
+                    Edit profile
                 </MenuItem>
 
                 <MenuItem onClick={logout} sx={menuItemHover}>
                     <ListItemIcon>
                         <Logout className="primary-color" fontSize="small" />
                     </ListItemIcon>
-                    Cerrar sesion
+                    Log out
                 </MenuItem>
             </Menu>
         </>

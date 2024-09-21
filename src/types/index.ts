@@ -9,7 +9,7 @@ export interface GlobalContextType {
     allPosts: AllPostsType[];
     setAllPosts: React.Dispatch<React.SetStateAction<AllPostsType[]>>;
     allUsers: AllUsersFetch;
-    loading: boolean;
+    loadingData: boolean;
     popularUsers: DocumentData[];
     loadingPopular: boolean;
     setRefresh: React.Dispatch<React.SetStateAction<{refresh: boolean, redirectTo: string}>>;
@@ -57,7 +57,7 @@ export interface ReplyTypes extends GlobalTypesPost {
 }
 
 export interface CommentTypes extends ReplyTypes {
-    respuestas: ReplyTypes[];
+    replies: ReplyTypes[];
 }
 
 export interface PostTypes extends GlobalTypesPost, MainPostProperties {
@@ -71,7 +71,7 @@ export type CreatePostArg = MainPostProperties & {
 }
 
 export type AllPostsType = {
-    usuario: DocumentData;
+    user: DocumentData;
     posts: DocumentData;
 }
 

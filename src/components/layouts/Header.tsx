@@ -24,7 +24,7 @@ export default function Header() {
 
     const { theme, setTheme } = useTheme();
 
-    const { navModal, setNavModal, setFormModal, user, loading } = useContext(GlobalContext);
+    const { navModal, setNavModal, setFormModal, user, loadingData } = useContext(GlobalContext);
 
     useEffect(() => {
         window.addEventListener('resize', (e: UIEvent) => {
@@ -88,7 +88,7 @@ export default function Header() {
                     <Search className="icon-label" />
                 </label>
 
-                <input type="text" placeholder="Buscar en Group 4..." id="search" className="w-full h-full relative" />
+                <input type="text" placeholder="Search in Group 4..." id="search" className="w-full h-full relative" />
             </form>
 
             <div className="all-center">
@@ -110,7 +110,7 @@ export default function Header() {
                     />
                 )}
 
-                {loading && (
+                {loadingData && (
                     <SkeletonComponent
                         variant="rectangular"
                         width={100}
@@ -118,14 +118,14 @@ export default function Header() {
                     />
                 )}
 
-                {((!user && !loading) && !searchActive) && (
-                    <button className="pointer" onClick={() => setFormModal(true)}>Iniciar Sesión</button>
+                {((!user && !loadingData) && !searchActive) && (
+                    <button className="pointer" onClick={() => setFormModal(true)}>Sign in</button>
                 )}
 
-                {(((user && !loading) && theme !== undefined) && !searchActive) && (
+                {(((user && !loadingData) && theme !== undefined) && !searchActive) && (
                     <UserOptions 
                         theme={theme}
-                        usuario={user}
+                        user={user}
                     />
                 )}
             </div>

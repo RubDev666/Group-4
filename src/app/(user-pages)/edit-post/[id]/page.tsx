@@ -5,8 +5,8 @@ import { EditPostForm } from "@/src/components/forms";
 import type { Params } from "@/src/types/components-props";
 
 export const metadata: Metadata = {
-    title: "Group 4 | Editar publicacion",
-    description: "Explora, comparte, y expresa lo que quieras con todo el mundo",
+    title: "Group 4 | Edit post",
+    description: "Explore, share, and express what you want with everyone",
 };
 
 export default function Page({ params }: Params) {

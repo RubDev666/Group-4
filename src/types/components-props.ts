@@ -12,10 +12,8 @@ export type DZProps = {
 
 export type FormCommentProps = {
     post: DocumentData;
-    comentario: string;
-    setComentario: Dispatch<SetStateAction<string>>;
     isReplyForm: boolean;
-    comentarioId?: string;
+    commentId?: string;
     indexComment?: number;
     resetFormComment: () => void;
 }
@@ -24,7 +22,7 @@ export type FormsSessionProps = {
     select: (e: React.FocusEvent<HTMLInputElement>) => void;
     blur: (e: React.FocusEvent<HTMLInputElement>) => void;
     setFormRegister: Dispatch<SetStateAction<boolean>>;
-    setExito: Dispatch<SetStateAction<boolean>>;
+    setSucces: Dispatch<SetStateAction<boolean>>;
     errorSubmit: string;
     setErrorSubmit: Dispatch<SetStateAction<string>>;
     setFormModal?: Dispatch<SetStateAction<boolean>>;
@@ -35,14 +33,14 @@ export type TypeOfFormProps = {
 }
 
 //================ COMPONENTS > posts =========
-export type CommentsContainerProps = Pick<FormCommentProps, 'comentario' | 'setComentario' | 'comentarioId' | 'resetFormComment'> & {
-    comentarioDoc: DocumentData;
-    setComentarioId: Dispatch<SetStateAction<string>>;
+export type CommentsContainerProps = Pick<FormCommentProps, 'commentId' | 'resetFormComment'> & {
+    commentDoc: DocumentData;
+    setCommentId: Dispatch<SetStateAction<string>>;
     currentPost: DocumentData;
     indexComment: number;
 }
 
-export type CommentProps = Pick<CommentsContainerProps, 'comentarioDoc' | 'setComentarioId' | 'currentPost' | 'indexComment'> & {
+export type CommentProps = Pick<CommentsContainerProps, 'commentDoc' | 'setCommentId' | 'currentPost' | 'indexComment'> & {
     userPost: DocumentData;
 }
 
@@ -53,11 +51,11 @@ export type CommentOptionsProps = {
 
 export type PostComponentProps = {
     postData: DocumentData;
-    creador: DocumentData;
+    creator: DocumentData;
 }
 
 export type ReplyProps = {
-    respuesta: DocumentData;
+    reply: DocumentData;
     currentPost: DocumentData;
     indexComment: number;
     indexReply: number;
@@ -78,7 +76,7 @@ export type SkeletonProps = {
 
 export type UserOptionsProps = {
     theme: string;
-    usuario: User;
+    user: User;
 }
 
 //===================== PAGE, PAGE COMPONENTS PROPS ============ 

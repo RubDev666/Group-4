@@ -16,7 +16,7 @@ import {
     Info
 } from "@mui/icons-material";
 
-import { IconTema, iconsTemas } from "@/src/utilities/asideLeftItems";
+import { TopicIcon, topicIcons } from "@/src/utilities/asideLeftItems";
 
 import { AvatarImg } from "../ui";
 import { DocumentData } from "firebase/firestore";
@@ -24,8 +24,10 @@ import { DocumentData } from "firebase/firestore";
 import firebase from "@/src/firebase/firebase";
 import { GlobalContext } from "@/src/app/providers";
 
+import AccordionPopulars from "./AccordionPopulars";
+
 export default function AsideLeft() {
-    const [mostrar, setMostrar] = useState(false);
+    const [showMoreTopics, setShowTopics] = useState(false);
     const [recentActivity, setRecentActivity] = useState<DocumentData>([]);
 
     const path = usePathname();
@@ -50,7 +52,7 @@ export default function AsideLeft() {
                     <Home className="icon icon-path" />
                 ) : (<HomeOutlined className="icon icon-path" />)}
 
-                <span>Principal</span>
+                <span>Main</span>
             </Link>
 
             <Link href='#' className="flex align-center justify-start text-color w-full bg-hover">
@@ -70,7 +72,7 @@ export default function AsideLeft() {
                             id="panel1-header"
                             className="titulo-acordeon"
                         >
-                            Recientes
+                            Recent
                         </AccordionSummary>
 
                         <AccordionDetails className='acordeon-items-container' sx={{ padding: '0' }}>
@@ -92,6 +94,12 @@ export default function AsideLeft() {
                 </>
             )}
 
+            <div className="accordion-populars">
+                <AccordionPopulars />
+
+                <hr />
+            </div>
+
             <Accordion className='w-full text-color acordeon' defaultExpanded sx={{ backgroundColor: 'transparent', boxShadow: 'none', "::before": { display: 'none' } }}>
                 <AccordionSummary
                     expandIcon={<ExpandMore className='icon-expanded' />}
@@ -99,25 +107,25 @@ export default function AsideLeft() {
                     id="panel1-header"
                     className="titulo-acordeon"
                 >
-                    Temas
+                    Topics
                 </AccordionSummary>
 
                 <AccordionDetails className='acordeon-items-container' sx={{ padding: '0' }}>
-                    {iconsTemas.map((iconTema: IconTema, index: number): ReactNode => {
-                        if (index > 5 && !mostrar) return;
+                    {topicIcons.map((topic: TopicIcon, index: number): ReactNode => {
+                        if (index > 5 && !showMoreTopics) return;
 
                         return (
-                            <Link key={iconTema.titulo} href={iconTema.path} className={`flex align-center justify-start text-color w-full bg-hover ${path === iconTema.path ? 'bg-path' : ''}`}>
-                                {iconTema.iconPath && path === iconTema.path ? (
-                                    <iconTema.iconPath className="icon icon-path" />
-                                ) : (<iconTema.icon className="icon icon-path" />)}
+                            <Link key={topic.title} href={topic.path} className={`flex align-center justify-start text-color w-full bg-hover ${path === topic.path ? 'bg-path' : ''}`}>
+                                {topic.iconPath && path === topic.path ? (
+                                    <topic.iconPath className="icon icon-path" />
+                                ) : (<topic.icon className="icon icon-path" />)}
 
-                                <span>{iconTema.titulo}</span>
+                                <span>{topic.title}</span>
                             </Link>
                         )
                     })}
 
-                    <button onClick={() => setMostrar(!mostrar)} className="btn-view bg-hover pointer">{!mostrar ? 'Ver más...' : 'Ver menos'}</button>
+                    <button onClick={() => setShowTopics(!showMoreTopics)} className="btn-view bg-hover pointer">{!showMoreTopics ? 'See more...' : 'See less'}</button>
                 </AccordionDetails>
             </Accordion>
 
@@ -130,14 +138,14 @@ export default function AsideLeft() {
                     id="panel1-header"
                     className="titulo-acordeon"
                 >
-                    Recursos
+                    Resources
                 </AccordionSummary>
 
                 <AccordionDetails className='acordeon-items-container' sx={{ padding: '0' }}>
                     <Link href='#' className="flex align-center justify-start text-color w-full bg-hover">
                         <Info className="icon icon-path" />
 
-                        <span>Acerca de Group 4</span>
+                        <span>About Group 4</span>
                     </Link>
                 </AccordionDetails>
             </Accordion>

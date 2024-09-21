@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, useContext, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 
 import { Favorite, FavoriteBorder } from '@mui/icons-material';
@@ -11,25 +11,26 @@ import { GlobalContext } from "@/src/app/providers";
 
 import { AvatarImg } from "../ui";
 
-import formatearFecha from "@/src/utilities/formatearFecha";
+import formatDate from "@/src/utilities/formatDate";
 import firebase from "@/src/firebase/firebase";
 import CommentOptions from "./CommentOptions";
 
 import type { ReplyProps } from "@/src/types/components-props";
 
-export default function Reply({ respuesta, currentPost, indexComment, indexReply }: ReplyProps) {
+export default function Reply({ reply, currentPost, indexComment, indexReply }: ReplyProps) {
     const [edit, setEdit] = useState(false);
-    const [comentarioEdit, setComentarioEdit] = useState<string>(respuesta.comment);
+    const [commentEdit, setCommentEdit] = useState<string>(reply.comment);
+    const [userReply, setUserReply] = useState<DocumentData | undefined>(undefined);
+
     const { allUsers, setFormModal, user, allPosts, setAllPosts } = useContext(GlobalContext);
-    const [usuarioReply, setUsuarioReply] = useState<DocumentData | undefined>(undefined);
 
     useEffect(() => {
         if (allUsers) {
-            const getUser = allUsers.get(respuesta.idUser);
+            const getUser = allUsers.get(reply.idUser);
 
-            setUsuarioReply(getUser);
+            setUserReply(getUser);
         }
-    }, [allUsers, respuesta])
+    }, [allUsers, reply])
 
     const likeToggle = async () => {
         if (!user) return setFormModal(true);
@@ -54,9 +55,9 @@ export default function Reply({ respuesta, currentPost, indexComment, indexReply
     }
 
     const saveEditComment = async () => {
-        if (comentarioEdit === respuesta.comment) return setEdit(false);
+        if (commentEdit === reply.comment) return setEdit(false);
 
-        if(!user || comentarioEdit === '') return;
+        if(!user || commentEdit === '') return;
 
         const {updatePosts, currentPosts, newPost} = handleCurrentData('editComment');
 
@@ -107,22 +108,22 @@ export default function Reply({ respuesta, currentPost, indexComment, indexReply
         switch (type) {
             case 'like': {
                 if(user) {
-                    let currentLikes: string[] = JSON.parse(JSON.stringify(respuesta.likes));
+                    let currentLikes: string[] = JSON.parse(JSON.stringify(reply.likes));
 
-                    newPost.comments[indexComment].respuestas[indexReply].likes = currentLikes.includes(user.uid) ? currentLikes.filter(uid => uid !== user.uid) : [user.uid, ...currentLikes];
+                    newPost.comments[indexComment].replies[indexReply].likes = currentLikes.includes(user.uid) ? currentLikes.filter(uid => uid !== user.uid) : [user.uid, ...currentLikes];
                 }
 
                 break;
             }
             case 'editComment': {
-                newPost.comments[indexComment].respuestas[indexReply].comment = comentarioEdit;
+                newPost.comments[indexComment].replies[indexReply].comment = commentEdit;
 
                 break;
             }
             case 'deleteComment': {
                 let currentComments = JSON.parse(JSON.stringify(currentPost.comments));
 
-                newPost.comments[indexComment].respuestas = currentComments[indexComment].respuestas.filter((com: DocumentData) => com.id !== respuesta.id);   
+                newPost.comments[indexComment].replies = currentComments[indexComment].replies.filter((com: DocumentData) => com.id !== reply.id);   
 
                 break;
             }
@@ -139,62 +140,68 @@ export default function Reply({ respuesta, currentPost, indexComment, indexReply
         }
     }
 
-    if (usuarioReply) return (
+    const memoizedHeaderReply = useMemo(() => {
+        if (userReply) return (
+            <div className="header-comentario relative flex justify-between w-full">
+                <div className='flex info-creator'>
+                    <Link href={`/u/${userReply.displayName}`} className="user text-color flex align-center">
+                        <AvatarImg
+                            size={30}
+                            fontSize={16}
+                            user={userReply}
+                        />
+
+                        <span className='user-name'>{`u/${userReply.displayName}`} </span>
+                    </Link>
+
+                    <p className='time text-opacity relative'>{formatDate(reply.date)}</p>
+                </div>
+
+                {(user && user.uid === reply.idUser) && (
+                    <CommentOptions deleteF={deleteComm} setEdit={setEdit} />
+                )}
+            </div>
+        )
+    }, [user, currentPost, userReply])
+
+    if (userReply) return (
         <div className="respuesta-main-container relative flex">
             <div className="linea"></div>
 
             <div className="respuesta-container w-full">
-                <div className="header-comentario relative flex justify-between w-full">
-                    <div className='flex info-creator'>
-                        <Link href={`/u/${usuarioReply.displayName}`} className="user text-color flex align-center">
-                            <AvatarImg
-                                size={30}
-                                fontSize={16}
-                                user={usuarioReply}
-                            />
-
-                            <span className='user-name'>{`u/${usuarioReply.displayName}`} </span>
-                        </Link>
-
-                        <p className='time text-opacity relative'>{formatearFecha(respuesta.date)}</p>
-                    </div>
-
-                    {(user && user.uid === respuesta.idUser) && (
-                        <CommentOptions deleteF={deleteComm} setEdit={setEdit} />
-                    )}
-                </div>
+                {memoizedHeaderReply}
 
                 <div className="respuesta">
-                    {!edit && <p>{respuesta.comment}</p>}
+                    {!edit && <p>{reply.comment}</p>}
 
                     {edit && (
                         <textarea
-                            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setComentarioEdit(e.target.value)}
+                            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setCommentEdit(e.target.value)}
                             name='edit-respuesta'
                             id='edit-respuesta'
                             className="w-full scroll-bar-style"
-                            defaultValue={respuesta.comment}
+                            defaultValue={reply.comment}
                         />
                     )}
 
                     <div className="actions-container w-full flex align-center justify-start">
                         {!edit && (
                             <div className="relative like all-center pointer bg-hover" onClick={likeToggle}>
-                                {(user && respuesta.likes.includes(user.uid)) ? (
+                                {(user && reply.likes.includes(user.uid)) ? (
                                     <Favorite className='icon primary-color' />
                                 ) : (
                                     <FavoriteBorder className='icon' />
                                 )}
 
-                                <span>{respuesta.likes.length.toString()}</span>
+                                <span>{reply.likes.length.toString()}</span>
                             </div>
                         )}
 
                         {edit && (
                             <>
-                                <button className="cancel-btn pointer bg-hover-2" onClick={() => setEdit(false)}>Cancelar</button>
+                                <button className="cancel-btn pointer bg-hover-2" onClick={() => setEdit(false)}>Cancel</button>
 
-                                <button className="comentar-btn pointer" onClick={saveEditComment}>Editar</button>
+                                <button className="comentar-btn pointer" onClick={saveEditComment}>Edit</button>
                             </>
                         )}
                     </div>

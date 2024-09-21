@@ -16,12 +16,12 @@ import { GlobalContext } from "@/src/app/providers";
 
 const FormActions = {
     createPost: {
-        titleForm: 'Crear un post',
-        btnAction: 'Crear'
+        titleForm: 'Create post',
+        btnAction: 'Create'
     },
     editProfile: {
-        titleForm: 'Editar perfil',
-        btnAction: 'Actualizar informacion'
+        titleForm: 'Edit profile',
+        btnAction: 'Update profile'
     }
 }
 
@@ -31,16 +31,16 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
 
     const { register, handleSubmit, formState: { errors }, watch } = useForm<UserFormType>();
 
-    const {setRefresh, loading: firstload, user} = useContext(GlobalContext);
+    const {setRefresh, loadingData, user} = useContext(GlobalContext);
 
     const router = useRouter();
 
     useEffect(() => {
-        if(!user && !firstload) router.push('/');
-    }, [firstload, user])
+        if(!user && !loadingData) router.push('/');
+    }, [loadingData, user])
 
     const onSubmit: SubmitHandler<UserFormType> = async (data) => {
-        //jamas sera string, solo que como usamos el mismo state para el otro formulario, por eso lo pongo...
+        //It will never be a string, only since we use the same state for the other form, that's why I put it...
         if(typeof imgFile === 'string' || !user) return;
 
         try {
@@ -81,7 +81,7 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
         }
     }
 
-    if (firstload && !user) return null;
+    if (loadingData && !user) return null;
 
     if (user) return (
         <div className="user-form-container">
@@ -104,26 +104,26 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
                     <div className="inputs-container w-full relative">
                         {typeForm === 'editProfile' && (
                             <>
-                                <p className={`${errors.name ? 'error' : ''}`}>Tu nombre actual: <span className='primary-color'>{user?.displayName}</span></p>
+                                <p className={`${errors.name ? 'error' : ''}`}>Current name: <span className='primary-color'>{user?.displayName}</span></p>
 
                                 <input
                                     className="bg-input"
                                     type="text"
                                     autoComplete='off'
-                                    placeholder="Tu nuevo nombre de user"
+                                    placeholder="New user name"
                                     {...register('name', {
                                         required: false,
                                         minLength: {
                                             value: 4,
-                                            message: 'Minimo 4 caracteres'
+                                            message: 'Min. 4 chars.'
                                         },
                                         maxLength: {
                                             value: 10,
-                                            message: 'Maximo 10 caracteres'
+                                            message: 'Max. 10 chars.'
                                         },
                                         pattern: {
                                             value: /[A-Za-z]{1}/,
-                                            message: 'Nombre no valido'
+                                            message: 'Invalid name'
                                         }
                                     })}
                                 />
@@ -134,21 +134,21 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
 
                         {typeForm === 'createPost' && (
                             <>
-                                <p>Titulo:</p>
+                                <p>Title:</p>
 
                                 <input
                                     className="bg-input"
                                     type="text"
                                     id="title-post"
-                                    placeholder="Titulo del post"
+                                    placeholder="Post title"
                                     {...register('title', {
                                         required: {
                                             value: true,
-                                            message: 'Titulo obligatorio*'
+                                            message: 'Title required*'
                                         },
                                         maxLength: {
                                             value: 60,
-                                            message: 'Maximo 60 caracteres*'
+                                            message: 'Max. 60 chars.*'
                                         }
                                     })}
                                 />
@@ -158,22 +158,22 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
                                 )}
 
                                 <div className="relative">
-                                    <p>Descripcion:</p>
+                                    <p>Description:</p>
 
                                     <textarea
                                         {...register("description", {
                                             required: {
                                                 value: true,
-                                                message: 'Descripcion obligatoria*'
+                                                message: 'Description required*'
                                             },
                                             maxLength: {
                                                 value: 300,
-                                                message: 'Maximo 300 caracteres*'
+                                                message: 'Max. 300 chars.*'
                                             }
                                         })}
                                         className="w-full bg-input"
                                         id="description-post"
-                                        placeholder="Descripcion del post"
+                                        placeholder="Post description"
                                     />
 
                                     {errors.description && (
@@ -184,7 +184,7 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
                         )}
 
                         <div className="dropzone-main-container relative">
-                            <p className={`${errorImg !== '' ? 'error' : ''}`}>{`${typeForm === 'editProfile' ? 'Tu foto de perfil:' : 'Elige/cambia tu foto:'}`}</p>
+                            <p className={`${errorImg !== '' ? 'error' : ''}`}>{`${typeForm === 'editProfile' ? 'Profile photo:' : 'Choose/change your photo:'}`}</p>
 
                             <Dropzone
                                 getImg={setImgFile}
@@ -201,7 +201,7 @@ export default function UserForm({ typeForm }: TypeOfFormProps) {
                         <div className="actions-post">
                             <button className="w-full create-btn pointer" type="submit">{FormActions[typeForm].btnAction}</button>
 
-                            <button className="w-full calcel-btn bg-hover-2 pointer" onClick={() => router.push('/')}>Cancelar</button>
+                            <button className="w-full calcel-btn bg-hover-2 pointer" onClick={() => router.push('/')}>Cancel</button>
                         </div>
                     </div>
                 </form>

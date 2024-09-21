@@ -1,13 +1,13 @@
 'use client';
 
-import { ChangeEvent, useContext, useState } from "react";
+import { ChangeEvent, useContext, useState, useMemo } from "react";
 import Link from "next/link";
 
 import { FavoriteBorder, ChatBubbleOutline, Favorite } from '@mui/icons-material';
 
 import { GlobalContext } from "@/src/app/providers";
 
-import formatearFecha from "@/src/utilities/formatearFecha";
+import formatDate from "@/src/utilities/formatDate";
 
 import firebase from "@/src/firebase/firebase";
 
@@ -17,9 +17,9 @@ import CommentOptions from "./CommentOptions";
 import type { CommentProps } from "@/src/types/components-props";
 import type { DocumentData } from "firebase/firestore";
 
-export default function Comment({comentarioDoc, setComentarioId, currentPost, indexComment, userPost}: CommentProps) {
+export default function Comment({commentDoc, setCommentId, currentPost, indexComment, userPost}: CommentProps) {
     const [edit, setEdit] = useState(false);
-    const [comentarioEdit, setComentarioEdit] = useState<string>(comentarioDoc.comment);
+    const [commentEdit, setCommentEdit] = useState<string>(commentDoc.comment);
 
     const { setFormModal, user, allPosts, setAllPosts } = useContext(GlobalContext);
 
@@ -46,8 +46,8 @@ export default function Comment({comentarioDoc, setComentarioId, currentPost, in
     }
 
     const saveEditComment = async () => {
-        if(comentarioEdit === comentarioDoc.comment) return setEdit(false);
-        if(!user || comentarioEdit === '') return;
+        if(commentEdit === commentDoc.comment) return setEdit(false);
+        if(!user || commentEdit === '') return;
 
         const {updatePosts, currentPosts, newPost} = handleCurrentData('editComment');
         
@@ -96,7 +96,7 @@ export default function Comment({comentarioDoc, setComentarioId, currentPost, in
         switch (type) {
             case 'like': {
                 if(user) {
-                    let currentLikes: string[] = JSON.parse(JSON.stringify(comentarioDoc.likes));
+                    let currentLikes: string[] = JSON.parse(JSON.stringify(commentDoc.likes));
 
                     newPost.comments[indexComment].likes = currentLikes.includes(user.uid) ? currentLikes.filter(uid => uid !== user.uid) : [user.uid, ...currentLikes];
                 }
@@ -104,14 +104,14 @@ export default function Comment({comentarioDoc, setComentarioId, currentPost, in
                 break;
             }
             case 'editComment': {
-                newPost.comments[indexComment].comment = comentarioEdit;
+                newPost.comments[indexComment].comment = commentEdit;
 
                 break;
             }
             case 'deleteComment': {
                 let currentComments = JSON.parse(JSON.stringify(currentPost.comments));
 
-                newPost.comments = currentComments.filter((com: DocumentData) => com.id !== comentarioDoc.id);   
+                newPost.comments = currentComments.filter((com: DocumentData) => com.id !== commentDoc.id);   
 
                 break;
             }
@@ -131,11 +131,11 @@ export default function Comment({comentarioDoc, setComentarioId, currentPost, in
     const replyBtn = () => {
         if(!user) return setFormModal(true);
 
-        setComentarioId(comentarioDoc.id)
+        setCommentId(commentDoc.id)
     }
 
-    return (
-        <div className="comentario-container relative w-full">
+    const meoizedHeaderComment = useMemo(() => {
+        return (
             <div className="header-comentario relative flex justify-between">
                 <div className='flex info-creator'>
                     <Link href={`/u/${userPost.displayName}`} className="user text-color flex align-center">
@@ -148,24 +148,30 @@ export default function Comment({comentarioDoc, setComentarioId, currentPost, in
                         <span className='user-name'>{`u/${userPost.displayName}`} </span>
                     </Link>
 
-                    <p className='time text-opacity relative'>{formatearFecha(comentarioDoc.date)}</p>
+                    <p className='time text-opacity relative'>{formatDate(commentDoc.date)}</p>
                 </div>
 
-                {(user && comentarioDoc.idUser === user.uid) && (
+                {(user && commentDoc.idUser === user.uid) && (
                     <CommentOptions deleteF={deleteComm} setEdit={setEdit} />
                 )}
             </div>
+        )
+    }, [currentPost, user])
 
-            <div className={`comentario ${comentarioDoc.respuestas.length === 0 && 'unique'}`}>
-                {!edit && <p>{comentarioDoc.comment}</p>}
+    return (
+        <div className="comentario-container relative w-full">
+            {meoizedHeaderComment}
+
+            <div className={`comentario ${commentDoc.replies.length === 0 && 'unique'}`}>
+                {!edit && <p>{commentDoc.comment}</p>}
 
                 {edit && (
                     <textarea
-                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setComentarioEdit(e.target.value)}
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setCommentEdit(e.target.value)}
                         name='edit-comentario'
                         id='edit-comentario'
                         className="w-full scroll-bar-style"
-                        defaultValue={comentarioDoc.comment}
+                        defaultValue={commentDoc.comment}
                     />
                 )}
 
@@ -173,28 +179,28 @@ export default function Comment({comentarioDoc, setComentarioId, currentPost, in
                     {!edit && (
                         <>
                             <div className="relative like all-center pointer bg-hover" onClick={likeToggle}>
-                                {(user && comentarioDoc.likes.includes(user.uid)) ? (
+                                {(user && commentDoc.likes.includes(user.uid)) ? (
                                     <Favorite className='icon primary-color' />
                                 ) : (
                                     <FavoriteBorder className='icon' />
                                 )}
 
-                                <span>{comentarioDoc.likes.length.toString()}</span>
+                                <span>{commentDoc.likes.length.toString()}</span>
                             </div>
 
                             <div className="relative comment all-center pointer bg-hover" onClick={replyBtn}>
                                 <ChatBubbleOutline className='icon' />
 
-                                <span>Responder</span>
+                                <span>Reply</span>
                             </div>
                         </>
                     )}
 
                     {edit && (
                         <>
-                            <button className="cancel-btn pointer bg-hover-2" onClick={() => setEdit(false)}>Cancelar</button>
+                            <button className="cancel-btn pointer bg-hover-2" onClick={() => setEdit(false)}>Cancel</button>
 
-                            <button className="comentar-btn pointer" onClick={saveEditComment}>Editar</button>
+                            <button className="comentar-btn pointer" onClick={saveEditComment}>Edit</button>
                         </>
                     )}
                 </div>

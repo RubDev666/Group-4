@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
 
 import { DocumentData } from "firebase/firestore";
 
@@ -11,36 +11,38 @@ import { Reply, Comment } from "@/src/components/posts";
 
 import type { CommentsContainerProps } from "@/src/types/components-props";
 
-export default function CommentsContainer({ comentarioDoc, setComentarioId, currentPost, indexComment, comentario, comentarioId, setComentario, resetFormComment}: CommentsContainerProps) {
+export default function CommentsContainer({ commentDoc, setCommentId, currentPost, indexComment, commentId, resetFormComment}: CommentsContainerProps) {
     const { allUsers } = useContext(GlobalContext);
 
-    const [usuarioPost, setUsuarioPost] = useState<DocumentData | undefined>(undefined);
+    const [userPost, setUserPost] = useState<DocumentData | undefined>(undefined);
 
     useEffect(() => {
         if (allUsers) {
-            const getUser = allUsers.get(comentarioDoc.idUser);
+            const getUser = allUsers.get(commentDoc.idUser);
 
-            setUsuarioPost(getUser);
+            setUserPost(getUser);
         }
-    }, [allUsers, comentarioDoc])
+    }, [allUsers, commentDoc])
 
-    if (usuarioPost) return (
+    const memoizedReplies = useMemo(() => {
+        return commentDoc.replies.length > 0 && commentDoc.replies.map((res: DocumentData, indexReply: number) => <Reply key={res.id} reply={res} currentPost={currentPost} indexComment={indexComment} indexReply={indexReply} />)
+    }, [currentPost]);
+
+    if (userPost) return (
         <div className="comentario-main-container w-full">
             <Comment 
-                userPost={usuarioPost}
-                comentarioDoc={comentarioDoc}
-                setComentarioId={setComentarioId}
+                userPost={userPost}
+                commentDoc={commentDoc}
+                setCommentId={setCommentId}
                 currentPost={currentPost}
                 indexComment={indexComment}
             />
 
-            {comentarioId === comentarioDoc.id && (
-                <div className={`formulario-container w-full ${comentarioDoc.respuestas.length > 0 && 'reply-true'}`}>
+            {commentId === commentDoc.id && (
+                <div className={`formulario-container w-full ${commentDoc.replies.length > 0 && 'reply-true'}`}>
                     <FormComment
                         post={currentPost}
-                        comentario={comentario}
-                        setComentario={setComentario}
-                        comentarioId={comentarioId}
+                        commentId={commentId}
                         isReplyForm={true}
                         indexComment={indexComment}
                         resetFormComment={resetFormComment}
@@ -48,7 +50,7 @@ export default function CommentsContainer({ comentarioDoc, setComentarioId, curr
                 </div>
             )}
 
-            {comentarioDoc.respuestas.length > 0 && comentarioDoc.respuestas.map((res: DocumentData, indexReply: number) => <Reply key={res.id} respuesta={res} currentPost={currentPost} indexComment={indexComment} indexReply={indexReply} />)}
+            {memoizedReplies}
         </div>
     )
 }

@@ -18,28 +18,28 @@ export default function User({ userName }: UserProps) {
     const [user, setUser] = useState<DocumentData | null>(null);
     const [posts, setPosts] = useState<AllPostsType[] | []>([]);
 
-    const {allPosts, loading } = useContext(GlobalContext);
+    const {allPosts, loadingData } = useContext(GlobalContext);
 
     useEffect(() => {
         const getDataUser = async () => {
-            const getUser = await firebase.getData('usuarios', userName);
+            const getUser = await firebase.getData('users', userName);
 
             if(!getUser) return setLoadingPageUser(false);
 
-            const loadingPost: AllPostsType[] = allPosts.filter(post => post.usuario.displayName === userName);
+            const loadingPost: AllPostsType[] = allPosts.filter(post => post.user.displayName === userName);
     
             setUser(getUser);
             setPosts(loadingPost);
             setLoadingPageUser(false);
         }
 
-        if(!loading && allPosts.length > 0) getDataUser();
-        if(!loading && allPosts.length === 0) setLoadingPageUser(false);
-    }, [allPosts, userName, loading])
+        if(!loadingData && allPosts.length > 0) getDataUser();
+        if(!loadingData && allPosts.length === 0) setLoadingPageUser(false);
+    }, [allPosts, userName, loadingData])
 
     if (loadingPageUser && !user) return null;
 
-    if(!loadingPageUser && !user) return <NotFound message="Usuario no encontrado" />;
+    if(!loadingPageUser && !user) return <NotFound message="User not found" />;
 
     if(!loadingPageUser && user) return (
         <div className="user-main-container w-full">
@@ -53,19 +53,19 @@ export default function User({ userName }: UserProps) {
                 <h4>{'u/' + user.displayName}</h4>
             </div>
 
-            <p>{'Miembro desde el: ' + user.dateRegister}</p>
+            <p>{'Member since: ' + user.dateRegister}</p>
 
             <hr />
 
             {posts.length > 0 ? (
-                <h5>{'Publicaciones de u/' + user.displayName}</h5>
+                <h5>{'Posts by u/' + user.displayName}</h5>
 
             ) : (
-                <h5>{'u/' + user.displayName + ' aun no ha publicado nada'}</h5>
+                <h5>{'u/' + user.displayName + " hasn't published anything yet"}</h5>
             )}
 
             {posts.map((post: AllPostsType) => (
-                <Post key={post.posts.id} postData={post.posts} creador={post.usuario} />
+                <Post key={post.posts.id} postData={post.posts} creator={post.user} />
             ))}
         </div>
     )

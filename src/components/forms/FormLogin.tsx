@@ -5,18 +5,18 @@ import { LoginType } from "@/src/types";
 import type { FormsSessionProps } from "@/src/types/components-props";
 import firebase from "@/src/firebase/firebase";
 
-export default function FormLogin({ select, setFormRegister, blur, setErrorSubmit, setExito, errorSubmit, setFormModal }: FormsSessionProps) {
+export default function FormLogin({ select, setFormRegister, blur, setErrorSubmit, setSucces: setExito, errorSubmit, setFormModal }: FormsSessionProps) {
     const { register, handleSubmit, formState: { errors }, watch } = useForm<LoginType>();
 
     const onSubmit: SubmitHandler<LoginType> = async (data) => {
         try {
-            await firebase.login(data);
+            await firebase.signIn(data);
 
             if(setFormModal) setFormModal(false);
         } catch (error: any) {
-            if(error.message.includes('auth/invalid-credential')) setErrorSubmit('Correo o contraseña incorrecta*');
+            if(error.message.includes('auth/invalid-credential')) setErrorSubmit('Incorrect email or password*');
 
-            if(error.message.includes('Access to this')) setErrorSubmit('Error - intentelo mas tarde');
+            if(error.message.includes('Access to this')) setErrorSubmit('Error - try again later*');
 
             setTimeout(() => {
                 setErrorSubmit('');
@@ -26,13 +26,13 @@ export default function FormLogin({ select, setFormRegister, blur, setErrorSubmi
 
     return ( 
         <>
-            <h3>Iniciar Sesion</h3>
+            <h3>Sign in</h3>
 
             <form onSubmit={handleSubmit(onSubmit)}>
-                {/*esta etiqueta me ayuda a corregir el error al cambiar de formulario, donde los valores de los inputs se mezclaban, por eso el otro formulario de registro no tiene esta etiqueta 'fieldset'...*/}
+                {/*This tag helps me correct the error when changing forms, where the input values ​​were mixed, that's why the other registration form does not have this 'fieldset' tag...*/}
                 <fieldset>
                     <div className="bg-input relative">
-                        <label htmlFor="email-s" className="email-s absolute">Correo electronico <span>*</span></label>
+                        <label htmlFor="email-s" className="email-s absolute">Email <span>*</span></label>
                         <input 
                             type="email" 
                             className="relative w-full"
@@ -46,11 +46,11 @@ export default function FormLogin({ select, setFormRegister, blur, setErrorSubmi
                             autoComplete="off" 
                         />
 
-                        {errors.email && <span className="error-input">Email obligatorio*</span>}
+                        {errors.email && <span className="error-input">Email required*</span>}
                     </div>
 
                     <div className="bg-input relative">
-                        <label htmlFor="password-s" className="password-s absolute">Contraseña <span>*</span></label>
+                        <label htmlFor="password-s" className="password-s absolute">Password <span>*</span></label>
                         <input 
                             type="password" 
                             className="relative w-full"
@@ -63,16 +63,16 @@ export default function FormLogin({ select, setFormRegister, blur, setErrorSubmi
                             autoComplete="off"  
                         />
 
-                        {errors.password && <span className="error-input">Contraseña obligatoria*</span>}
+                        {errors.password && <span className="error-input">Password required*</span>}
                     </div>
                 </fieldset>
 
-                <p>¿Es tu primera vez en Group 4? <span className="pointer" onClick={() => setFormRegister(true)}>Registrate</span></p>
+                <p>Is this your first time in group 4? <span className="pointer" onClick={() => setFormRegister(true)}>Register</span></p>
 
                 <div className="action-container relative text-center">
                     {errorSubmit !== '' && <span className="error-submit absolute w-full">{errorSubmit}</span>}
 
-                    <button type="submit" className="btn-submit w-full">Inciar Sesion</button>
+                    <button type="submit" className="btn-submit w-full">Sign in</button>
                 </div>
             </form>
         </>

@@ -20,7 +20,7 @@ const defaultValues: GlobalContextType = {
     allPosts: [],
     setAllPosts: () => {},
     allUsers: null,
-    loading: true,
+    loadingData: true,
     popularUsers: [],
     loadingPopular: true,
     setRefresh: () => {},
@@ -30,7 +30,7 @@ const defaultValues: GlobalContextType = {
 
 export const GlobalContext = createContext<GlobalContextType>(defaultValues); 
 
-//el codigo original llevaba esto, pero era un ejemplo con tailwind
+//The original code had this, but it was an example with tailwind
 //<ThemeProvider attribute="class" defaultTheme='system' enableSystem>
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -132,7 +132,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     allPosts,
                     setAllPosts,
                     allUsers,
-                    loading: loadingData,
+                    loadingData,
                     popularUsers,
                     loadingPopular,
                     setRefresh,

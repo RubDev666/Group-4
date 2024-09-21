@@ -12,7 +12,7 @@ export default function ImgHero() {
             />
 
             <div className="relative w-full h-full">
-                <h1 className="absolute">Explora, comparte, expresa y habla lo que quieras.</h1>
+                <h1 className="absolute">Explore, share, and express what you want with everyone.</h1>
             </div>
         </div>
     )

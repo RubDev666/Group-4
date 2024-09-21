@@ -11,23 +11,23 @@ export default function FormSesion() {
     const [formRegister, setFormRegister] = useState(false);
     const { setFormModal, user, setRefresh } = useContext(GlobalContext);
 
-    const [exito, setExito] = useState(false);
+    const [succes, setSucces] = useState(false);
     const [errorSubmit, setErrorSubmit] = useState<string>('')
 
     useEffect(() => {
-        if (exito && user) {
-            setExito(false);
+        if (succes && user) {
+            setSucces(false);
 
             setRefresh({refresh: true, redirectTo: `/u/${user.displayName}`})
 
             setFormModal(false);
         }
-    }, [exito, setFormModal, user])
+    }, [succes, setFormModal, user])
 
     const closeLoginModal = (e: React.MouseEvent<HTMLElement>): void => {
         const target = e.target as HTMLElement;
 
-        //gracias al icono esto da error, mejor un data-set para evitar tanta validacion...
+        //Thanks to the icon this gives an error, better a dataset to avoid so much validation...
         //console.log(target.className.includes('login-modal'));
 
         if (!target.dataset.set) return;
@@ -55,7 +55,7 @@ export default function FormSesion() {
                         select={select}
                         setFormRegister={setFormRegister}
                         blur={blur}
-                        setExito={setExito}
+                        setSucces={setSucces}
                         errorSubmit={errorSubmit}
                         setErrorSubmit={setErrorSubmit}
                         setFormModal={setFormModal}
@@ -65,7 +65,7 @@ export default function FormSesion() {
                         select={select}
                         setFormRegister={setFormRegister}
                         blur={blur}
-                        setExito={setExito}
+                        setSucces={setSucces}
                         errorSubmit={errorSubmit}
                         setErrorSubmit={setErrorSubmit}
                     />

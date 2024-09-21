@@ -3,7 +3,7 @@ export default function Spinner() {
         <div className="w-full all-center direction-column spinner-container">
             <span className="loader"></span>
 
-            <h2>Cargando...</h2>
+            <h2>Loading...</h2>
         </div>
     )
 }

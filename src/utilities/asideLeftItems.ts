@@ -48,40 +48,40 @@ import {
 import { SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
 
-export interface IconTema {
-    titulo: string;
+export interface TopicIcon {
+    title: string;
     path: string;
     icon: OverridableComponent<SvgIconTypeMap<{}, "svg">> & {muiName: string;};
     iconPath?: OverridableComponent<SvgIconTypeMap<{}, "svg">> & {muiName: string;};
 }
 
-export const iconsTemas = <IconTema[]>[
-    {titulo: 'Videojuegos', path: '/videojuegos', icon: SportsEsportsOutlined, iconPath: SportsEsports},
-    {titulo: 'Deportes', path: '/deportes', icon: SportsBaseballOutlined, iconPath: SportsBaseball},
-    {titulo: 'Negocios', path: '/negocios', icon: Business},
-    {titulo: 'Televisión', path: '/tv', icon: Tv},
-    {titulo: 'Famosos', path: '/famosos', icon: StarOutline, iconPath: Star},
-    {titulo: 'Animales / Mascotas', path: '/animales-mascotas', icon: Pets},
-    {titulo: 'Anime / Animacion', path: '/anime-animacion', icon: Face3Outlined, iconPath: Face3},
-    {titulo: 'Arte', path: '/arte', icon: ColorLensOutlined, iconPath: ColorLens},
-    {titulo: 'Autos / Motores / Vehiculos de motor', path: '/vehiculos', icon: DirectionsCarOutlined, iconPath: DirectionsCar},
-    {titulo: 'Manualidades', path: '/manualidades', icon: AutoAwesomeOutlined, iconPath: AutoAwesome},
-    {titulo: 'Cultura, Razas y Etnias', path: '/cultura', icon: Diversity3},
-    {titulo: 'Ética y filosofia', path: '/etica-filosofia', icon: AccountBalanceOutlined, iconPath: AccountBalance},
-    {titulo: 'Moda', path: '/moda', icon: Checkroom},
-    {titulo: 'Comidas / Bebidas', path: '/comidas-bebidas', icon: Restaurant},
-    {titulo: 'Historia', path: '/historia', icon: AutoStoriesOutlined, iconPath: AutoStories},
-    {titulo: 'Hobbies', path: '/hobbies', icon: Skateboarding},
-    {titulo: 'Derecho', path: '/derecho', icon: Gavel},
-    {titulo: 'Aprendizaje / Educacion', path: '/educacion', icon: SchoolOutlined, iconPath: School},
-    {titulo: 'Cine', path: '/cine', icon: TheatersOutlined},
-    {titulo: 'Música', path: '/musica', icon: LibraryMusicOutlined, iconPath: LibraryMusic},
-    {titulo: 'Lugares', path: '/lugares', icon: PlaceOutlined, iconPath: Place},
-    {titulo: 'Podcast / Streaming', path: '/podcast-streaming', icon: SettingsInputAntenna},
-    {titulo: 'Politica', path: '/politica', icon: HowToVoteOutlined, iconPath: HowToVote},
-    {titulo: 'Programacion', path: '/programacion', icon: Terminal},
-    {titulo: 'Lectura / Literatura / Escritura', path: '/literatura', icon: LocalLibraryOutlined, iconPath: LocalLibrary},
-    {titulo: 'Religion / Espiritualidad', path: '/religion-espiritualidad', icon: ChurchOutlined, iconPath: Church},
-    {titulo: 'Ciencia', path: '/ciencia', icon: ScienceOutlined, iconPath: Science},
-    {titulo: 'Tecnología', path: '/tecnologia', icon: Smartphone},
+export const topicIcons = <TopicIcon[]>[
+    {title: 'Video games', path: '/videogames', icon: SportsEsportsOutlined, iconPath: SportsEsports},
+    {title: 'Sports', path: '/sports', icon: SportsBaseballOutlined, iconPath: SportsBaseball},
+    {title: 'Business', path: '/business', icon: Business},
+    {title: 'TV', path: '/tv', icon: Tv},
+    {title: 'Famous', path: '/famous', icon: StarOutline, iconPath: Star},
+    {title: 'Animals / Pets', path: '/animals-pets', icon: Pets},
+    {title: 'Anime / Animation', path: '/anime-animation', icon: Face3Outlined, iconPath: Face3},
+    {title: 'Art', path: '/art', icon: ColorLensOutlined, iconPath: ColorLens},
+    {title: 'Cars / Motors / Vehicles', path: '/vehicles', icon: DirectionsCarOutlined, iconPath: DirectionsCar},
+    {title: 'Crafts', path: '/crafts', icon: AutoAwesomeOutlined, iconPath: AutoAwesome},
+    {title: 'Culture / Races / Ethnicities', path: '/culture', icon: Diversity3},
+    {title: 'Ethics / Philosophy', path: '/ethics-philosophy', icon: AccountBalanceOutlined, iconPath: AccountBalance},
+    {title: 'Fashion', path: '/fashion', icon: Checkroom},
+    {title: 'Meals / Drinks', path: '/meals-drinks', icon: Restaurant},
+    {title: 'History', path: '/history', icon: AutoStoriesOutlined, iconPath: AutoStories},
+    {title: 'Hobbies', path: '/hobbies', icon: Skateboarding},
+    {title: 'Law', path: '/law', icon: Gavel},
+    {title: 'Learning / Education', path: '/education', icon: SchoolOutlined, iconPath: School},
+    {title: 'Movies', path: '/movies', icon: TheatersOutlined},
+    {title: 'Music', path: '/music', icon: LibraryMusicOutlined, iconPath: LibraryMusic},
+    {title: 'Places', path: '/places', icon: PlaceOutlined, iconPath: Place},
+    {title: 'Podcast / Streaming', path: '/podcast-streaming', icon: SettingsInputAntenna},
+    {title: 'Politics', path: '/politics', icon: HowToVoteOutlined, iconPath: HowToVote},
+    {title: 'Programming', path: '/programming', icon: Terminal},
+    {title: 'Literature', path: '/literature', icon: LocalLibraryOutlined, iconPath: LocalLibrary},
+    {title: 'Religion / Spirituality', path: '/religion-spirituality', icon: ChurchOutlined, iconPath: Church},
+    {title: 'Science', path: '/science', icon: ScienceOutlined, iconPath: Science},
+    {title: 'Technology', path: '/tech', icon: Smartphone},
 ]

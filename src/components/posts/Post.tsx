@@ -9,7 +9,7 @@ import { FavoriteBorder, ChatBubbleOutline, IosShare, Favorite } from '@mui/icon
 
 import { AvatarImg } from '../ui';
 
-import formatearFecha from '@/src/utilities/formatearFecha';
+import formatDate from '@/src/utilities/formatDate';
 
 import firebase from '@/src/firebase/firebase';
 import PostOptions from './PostOptions';
@@ -18,13 +18,13 @@ import { GlobalContext } from "@/src/app/providers";
 
 import type { PostComponentProps } from '@/src/types/components-props';
 
-export default function Post({ postData, creador }: PostComponentProps) {
+export default function Post({ postData, creator }: PostComponentProps) {
     const path = usePathname();
     const router = useRouter();
 
     const {setFormModal, user, setAllPosts, allPosts} = useContext(GlobalContext);
 
-    const totalComments = (): number => postData.comments.reduce((total: number, comment: any) => total + (comment.respuestas.length || 0), postData.comments.length);
+    const totalComments = (): number => postData.comments.reduce((total: number, comment: any) => total + (comment.replies.length || 0), postData.comments.length);
 
     const likeToggle = async () => {
         if (!user) return setFormModal(true);
@@ -71,20 +71,20 @@ export default function Post({ postData, creador }: PostComponentProps) {
 
                 <div className="header-post relative flex justify-between">
                     <div className='flex info-creator'>
-                        <Link href={`/u/${creador.displayName}`} className="user text-color flex align-center">
+                        <Link href={`/u/${creator.displayName}`} className="user text-color flex align-center">
                             <AvatarImg
                                 size={30}
                                 fontSize={20}
-                                user={creador}
+                                user={creator}
                             />
 
-                            <span className='user-name'>{`u/${creador.displayName}`} </span>
+                            <span className='user-name'>{`u/${creator.displayName}`} </span>
                         </Link>
 
-                        <p className='time text-opacity relative'>{formatearFecha(postData.date)}</p>
+                        <p className='time text-opacity relative'>{formatDate(postData.date)}</p>
                     </div>
 
-                    {(user && user.uid === creador.uid) && (
+                    {(user && user.uid === creator.uid) && (
                         <PostOptions idPost={postData.id} />
                     )}
                 </div>
@@ -127,13 +127,13 @@ export default function Post({ postData, creador }: PostComponentProps) {
                     <div className="relative comment all-center pointer bg-hover-2" onClick={redirectPost}>
                         <ChatBubbleOutline className='icon' />
 
-                        <span>{totalComments()}</span>
+                        <span>{totalComments().toString()}</span>
                     </div>
 
                     <div className="relative share all-center pointer bg-hover-2">
                         <IosShare className='icon' />
 
-                        <span>Compartir</span>
+                        <span>Share</span>
                     </div>
                 </div>
             </article >

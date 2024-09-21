@@ -7,7 +7,7 @@ import { getFirestore, collection, getDocs, orderBy, query, deleteDoc, doc, getD
 
 import { RegisterType, UserDbType, LoginType, PostTypes, CreatePostArg, AllPostsType, updatePostParams, EditPost, PopularUsers, AllUsersFetch } from '../types';
 
-import { getDateRegister, getRandomColor, CONECTION_ERROR_MESSAGE } from './utils';
+import { getDateRegister, getRandomColor, CONECTION_ERROR_MESSAGE, USERNAME_EXIST_ERROR_MESSAGE } from './utils';
 
 import { v4 as generateId } from 'uuid';
 
@@ -27,15 +27,15 @@ class Firebase {
     }
 
     //registrar usuario
-    async registrar(data: RegisterType) {
+    async registerUser(data: RegisterType) {
         if (!this.auth || !this.db) throw new Error(CONECTION_ERROR_MESSAGE);
 
         const { name, email, password } = data;
         const cleanName = name.replace(/ /g, "");
 
-        const nameUserVerified = await this.getData('usuarios', cleanName);
+        const nameUserVerified = await this.getData('users', cleanName);
 
-        if (nameUserVerified) throw new Error('El nombre de usuario ya esta en uso*');
+        if (nameUserVerified) throw new Error(USERNAME_EXIST_ERROR_MESSAGE);
 
         const res = await createUserWithEmailAndPassword(this.auth, email, password);
 
@@ -48,7 +48,7 @@ class Firebase {
                 .then(() => {
                     // Email verification sent!
                     // ...
-                    console.log('email enviado');
+                    console.log('email sent');
                 });
         }
 
@@ -59,57 +59,57 @@ class Firebase {
             dateRegister: getDateRegister()
         }
 
-        if (res.user.displayName) await setDoc(doc(this.db, "usuarios", res.user.displayName), newUser);
+        if (res.user.displayName) await setDoc(doc(this.db, "users", res.user.displayName), newUser);
     }
 
-    cerrarSesion = async () => {
+    logOut = async () => {
         if (this.auth) await signOut(this.auth);
     }
 
-    login = async (datos: LoginType) => {
-        if (this.auth) await signInWithEmailAndPassword(this.auth, datos.email, datos.password);
+    signIn = async (data: LoginType) => {
+        if (this.auth) await signInWithEmailAndPassword(this.auth, data.email, data.password);
     }
 
     async updateProfileImg(img: File, user: User) {
         if (!this.auth || !this.db || !this.auth.currentUser) return;
 
-        //obtener url y actualizar el perfil del usuario
+        //get url and update user profile
         const urlImg = await this.uploadImg(`images/profiles/${user.uid}`, img);
 
         await updateProfile(this.auth.currentUser, { photoURL: urlImg });
 
-        //actualizar la base de datos con el usuario
-        if (user.displayName) await updateDoc(doc(this.db, "usuarios", user.displayName), { photoURL: urlImg });
+        //update database with user
+        if (user.displayName) await updateDoc(doc(this.db, "users", user.displayName), { photoURL: urlImg });
     }
 
-    async updateUserName(name: string, usuario: User) {
+    async updateUserName(newName: string, user: User) {
         if (!this.auth || !this.db) throw new Error(CONECTION_ERROR_MESSAGE);
 
-        const nameUserVerified = await this.getData('usuarios', name);
-        if (nameUserVerified) throw new Error('El nombre de usuario ya esta en uso*');
+        const nameUserVerified = await this.getData('users', newName);
+        if (nameUserVerified) throw new Error(USERNAME_EXIST_ERROR_MESSAGE);
 
-        let datosActuales;
+        let currentData;
 
-        if (usuario.displayName) datosActuales = await this.getData('usuarios', usuario.displayName);
+        if (user.displayName) currentData = await this.getData('users', user.displayName);
 
-        //actualizar el usuario de la base de datos
-        if (datosActuales) {
+        //update database user
+        if (currentData) {
             const updateUser: UserDbType = {
-                uid: datosActuales.uid,
-                displayName: name,
-                photoURL: datosActuales.photoURL,
-                dateRegister: datosActuales.dateRegister
+                uid: currentData.uid,
+                displayName: newName,
+                photoURL: currentData.photoURL,
+                dateRegister: currentData.dateRegister
             }
 
-            //crea un nuevo registro con el resto de los datos anteriores conservados
-            await setDoc(doc(this.db, "usuarios", name), updateUser);
+            //creates a new record with the rest of the previous data preserved
+            await setDoc(doc(this.db, "users", newName), updateUser);
 
-            //elimina el anterior registro, lo hago de esta forma para que las busquedas de usuario en la base de datos sea mas rapido y no iterar uno por uno con el id...
-            await deleteDoc(doc(this.db, "usuarios", datosActuales.displayName));
+            //delete previous record, I do it this way so that user searches in the database are faster and not iterate one by one with the id...
+            await deleteDoc(doc(this.db, "users", currentData.displayName));
         }
 
-        //actualizar el nombre del perfil
-        if (this.auth.currentUser) await updateProfile(this.auth.currentUser, { displayName: name });
+        //update profile name
+        if (this.auth.currentUser) await updateProfile(this.auth.currentUser, { displayName: newName });
     }
 
     async createPost({ title, description, imgFile, user }: CreatePostArg): Promise<string> {
@@ -135,20 +135,20 @@ class Firebase {
         return idPost;
     }
 
-    //guardar la imagen para post o foto de perfil en la base de datos
-    async uploadImg(ubicacion: string, img: File): Promise<string> {
+    //save image for "posts" or "profile image" to database
+    async uploadImg(location: string, img: File): Promise<string> {
         if (!this.storage) throw new Error(CONECTION_ERROR_MESSAGE);
 
-        const storageRef = ref(this.storage, ubicacion);
+        const storageRef = ref(this.storage, location);
         await uploadBytes(storageRef, img);
 
-        //obtener url y actualizar el perfil del usuario
+        //get url y update user profile
         const urlImg = await getDownloadURL(storageRef).then((url) => url);
 
         return urlImg;
     }
 
-    //extraer un solo dato en especifico de la base de datos, ya sea un post o un usuario en especifico.
+    //extract a single specific piece of data from the database, whether it is a post or a specific user.
     async getData(ref: string, idData: string): Promise<DocumentData | null> {
         if (!this.db) return null;
 
@@ -173,15 +173,16 @@ class Firebase {
             const postData = post.data();
             const user = usersMap.get(postData.idUser);
         
-            return user ? { usuario: user, posts: postData } : null;
+            return user ? { user, posts: postData } : null;
         }).filter(post => post !== null);
         
         return getData;
     }
+
     async getAllUsers(): Promise<AllUsersFetch> {
         if (!this.db) return null;
 
-        const refUsers = query(collection(this.db, 'usuarios'));
+        const refUsers = query(collection(this.db, 'users'));
         const resUsers = await getDocs(refUsers);
 
         const users = resUsers.docs.map(user => user.data());
@@ -191,9 +192,9 @@ class Firebase {
         return usersMap;
     }
 
-    //agrega o actualiza comentarios o respuestas a la vez
-    //es mas facil reemplazar todo el arreglo que buscar en especifico...
-    //tambien actualizamos los likes del post
+    //add or update comments or responses at the same time
+    //it is easier to replace the entire array than to search specifically...
+    //we also update the likes of the post
     async updatePost({ idPost, key, newData, currentData, idCreator }: updatePostParams) {
         if (!this.db) return;
 
@@ -216,10 +217,10 @@ class Firebase {
 
         let img: string | null = null;
 
-        //para subir una imagen nueva o reemplazarla del post
+        //to upload a new image or replace it in the post
         if (imgUrl && typeof imgUrl !== 'string') img = await this.uploadImg(`images/post/${idPost}`, imgUrl);
 
-        //borrar imagen de un post
+        //delete image from a post
         if (deleteImg) await deleteObject(ref(this.storage, `images/post/${idPost}`));
 
         await updateDoc(doc(this.db, "posts", idPost), {
@@ -239,7 +240,7 @@ class Firebase {
         const allPosts = await this.getAllPosts();
 
         const getTotalLikes = allPosts
-            .filter(data => data.usuario.uid === uid)
+            .filter(data => data.user.uid === uid)
             .reduce((total, data) => data.posts.likes.length + total, 0)
 
         const popularData: PopularUsers = {

@@ -1,4 +1,5 @@
 'use client';
+
 import { useContext, useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { usePathname, useRouter } from 'next/navigation';
@@ -125,7 +126,7 @@ export default function PostOptions({idPost}: PostProps) {
                             <ListItemIcon>
                                 <Edit className="primary-color" fontSize="small" />
                             </ListItemIcon>
-                            Editar post
+                            Edit post
                         </MenuItem>
 
                         <MenuItem 
@@ -135,7 +136,7 @@ export default function PostOptions({idPost}: PostProps) {
                             <ListItemIcon>
                                 <Delete className="primary-color" fontSize="small" />
                             </ListItemIcon>
-                            Borrar Post
+                            Delete post
                         </MenuItem>
                     </Menu>
                 </>

@@ -7,18 +7,18 @@ import firebaseConfig from '../firebase/config';
 import { User, getAuth, onAuthStateChanged } from "firebase/auth";
 
 function useAutenticacion() {
-    const [ usuarioAutenticado, guardarUsuarioAutenticado] = useState<User | null>(null);
+    const [ userAuth, setUserAuth] = useState<User | null>(null);
 
     useEffect(() => {
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        const unsuscribe = onAuthStateChanged(auth, (user) => guardarUsuarioAutenticado(user));
+        const unsuscribe = onAuthStateChanged(auth, (user) => setUserAuth(user));
 
         return () => unsuscribe();
     }, []);
 
-    return usuarioAutenticado;
+    return userAuth;
 }
 
 export default useAutenticacion;

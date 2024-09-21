@@ -5,20 +5,20 @@ import firebase from "@/src/firebase/firebase";
 import { RegisterType } from "@/src/types";
 import type { FormsSessionProps } from "@/src/types/components-props";
 
-export default function FormRegister({ select, setFormRegister, blur, setExito, setErrorSubmit, errorSubmit }: FormsSessionProps) {
+export default function FormRegister({ select, setFormRegister, blur, setSucces, setErrorSubmit, errorSubmit }: FormsSessionProps) {
     const { register, handleSubmit, formState: { errors }, watch } = useForm<RegisterType>();
 
     const onSubmit: SubmitHandler<RegisterType> = async (data) => {
         if(data.password !== data.confirmPassword) return;
  
         try {
-            await firebase.registrar(data);
+            await firebase.registerUser(data);
 
-            setExito(true);
+            setSucces(true);
         } catch (error: any) {
-            if(error.message.includes('auth/email')) setErrorSubmit('El email ya esta en uso*');
+            if(error.message.includes('auth/email')) setErrorSubmit('The email is already in use*');
 
-            if(error.message.includes('nombre')) setErrorSubmit(error.message);
+            if(error.message.includes('name')) setErrorSubmit(error.message);
 
             setTimeout(() => {
                 setErrorSubmit('');
@@ -28,28 +28,28 @@ export default function FormRegister({ select, setFormRegister, blur, setExito, 
 
     return (
         <>
-            <h3>Registrate</h3>
+            <h3>Register</h3>
 
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="bg-input relative">
-                    <label htmlFor="username" className="username absolute">Nombre de usuario <span>*</span></label>
+                    <label htmlFor="username" className="username absolute">User name <span>*</span></label>
                     <input
                         type="text"
                         className="relative w-full"
                         onSelect={select}
                         id="username" 
                         autoComplete="off"
-                        {...register("name", { required: true, pattern: /[A-Za-z]{1}/, maxLength: {value: 10, message: 'Maximo 10 caracteres*'} })}
+                        {...register("name", { required: true, pattern: /[A-Za-z]{1}/, maxLength: {value: 10, message: 'Max. 10 chars.*'} })}
                         onBlur={blur}
                     />
 
-                    {errors.name?.type === 'pattern' && <span className="error-input">Nombre no valido*</span>}
-                    {errors.name?.type === 'required' && <span className="error-input">Nombre obligatorio*</span>}
+                    {errors.name?.type === 'pattern' && <span className="error-input">Invalid name*</span>}
+                    {errors.name?.type === 'required' && <span className="error-input">Name required*</span>}
                     {errors.name?.type === 'maxLength' && <span className="error-input">{errors.name.message}</span>}
                 </div>
 
                 <div className="bg-input relative">
-                    <label htmlFor="email" className="email absolute">Correo electronico <span>*</span></label>
+                    <label htmlFor="email" className="email absolute">Email <span>*</span></label>
                     <input
                         type="email"
                         className="relative w-full"
@@ -57,10 +57,10 @@ export default function FormRegister({ select, setFormRegister, blur, setExito, 
                         id="email"
                         autoComplete="off"
                         {...register("email", {
-                            required: "Email obligatorio",
+                            required: "Email required",
                             pattern: {
                                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                message: 'Email No Válido'
+                                message: 'Invalid email'
                             }
                         })}
                         onBlur={blur}
@@ -70,7 +70,7 @@ export default function FormRegister({ select, setFormRegister, blur, setExito, 
                 </div>
 
                 <div className="bg-input relative">
-                    <label htmlFor="password" className="password absolute">Contraseña <span>*</span></label>
+                    <label htmlFor="password" className="password absolute">Password <span>*</span></label>
                     <input
                         type="password"
                         className="relative w-full"
@@ -78,10 +78,10 @@ export default function FormRegister({ select, setFormRegister, blur, setExito, 
                         id="password"
                         autoComplete="off"
                         {...register('password', {
-                            required: 'Contraseña obligatoria*',
+                            required: 'Password required*',
                             minLength: {
                                 value: 6,
-                                message: 'Minimo 6 caracteres*'
+                                message: 'Min. 6 chars.*'
                             }
                         })}
                         onBlur={blur}
@@ -91,7 +91,7 @@ export default function FormRegister({ select, setFormRegister, blur, setExito, 
                 </div>
  
                 <div className="bg-input relative">
-                    <label htmlFor="password-confirm" className="password-confirm absolute">Confirmar contraseña <span>*</span></label>
+                    <label htmlFor="password-confirm" className="password-confirm absolute">Confirm password <span>*</span></label>
                     <input
                         type="password"
                         className="relative w-full"
@@ -102,15 +102,15 @@ export default function FormRegister({ select, setFormRegister, blur, setExito, 
                         autoComplete="off"
                     />
 
-                    {(watch('password') !== undefined && watch('confirmPassword') !== undefined) && (watch('confirmPassword') !== watch('password') && <span className="error-input">No coincide la contraseña*</span>)}
+                    {(watch('password') !== undefined && watch('confirmPassword') !== undefined) && (watch('confirmPassword') !== watch('password') && <span className="error-input">Password does not match*</span>)}
                 </div>
 
-                <p>¿Ya eres mienbro de Group 4? <span className="pointer" onClick={() => setFormRegister(false)}>Inicia Sesion</span></p>
+                <p>Are you already a member of group 4? <span className="pointer" onClick={() => setFormRegister(false)}>Sign in</span></p>
 
                 <div className="action-container relative text-center">
                     {errorSubmit !== '' && <span className="error-submit absolute w-full">{errorSubmit}</span>}
 
-                    <button type="submit" className="btn-submit w-full pointer">Registrarse</button>
+                    <button type="submit" className="btn-submit w-full pointer">Register</button>
                 </div>
             </form>
         </>

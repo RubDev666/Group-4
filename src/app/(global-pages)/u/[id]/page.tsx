@@ -9,7 +9,7 @@ export async function generateMetadata(
     { params, searchParams }: DynamicParams,
     parent: ResolvingMetadata
 ): Promise<Metadata> {
-    const user = await firebase.getData('usuarios', params.id);
+    const user = await firebase.getData('users', params.id);
 
     if(!user) return {title: 'User Not Found'}
 

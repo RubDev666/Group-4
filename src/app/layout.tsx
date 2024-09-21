@@ -6,7 +6,7 @@ import '../styles/index.scss';
 
 export const metadata: Metadata = {
     title: "Group 4",
-    description: "Explora, comparte, y expresa lo que quieras con todo el mundo",
+    description: "Explore, share, and express what you want with everyone",
 }; 
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

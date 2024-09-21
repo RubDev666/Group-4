@@ -4,7 +4,7 @@ import { useContext } from 'react';
 
 import { Post } from '../components/posts';
 
-import { AllPostsType } from '@/src/types';
+import type { AllPostsType } from '@/src/types';
 
 import { GlobalContext } from '@/src/app/providers';
 
@@ -14,18 +14,18 @@ export default function Main() {
     if (allPosts.length === 0) {
         return (
             <div className="main-container w-full">
-                <p>Se el primero en publicar...</p>
+                <p>Be the first to publish...</p>
             </div>
         );
     }
 
     return (
         <div className="main-container w-full">
-            {allPosts.map((dato: AllPostsType) => (
+            {allPosts.map((data: AllPostsType) => (
                 <Post
-                    key={dato.posts.id}
-                    postData={dato.posts}
-                    creador={dato.usuario}
+                    key={data.posts.id}
+                    postData={data.posts}
+                    creator={data.user}
                 />
             ))}
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useCallback, useMemo } from "react";
 
 import { NotFound } from "@/src/components/ui";
 import { Post as PostComponent, CommentsContainer } from "@/src/components/posts";
@@ -8,14 +8,13 @@ import { FormComment } from "@/src/components/forms";
 
 import { GlobalContext } from "@/src/app/providers";
 
-import { DocumentData } from "firebase/firestore";
+import type { DocumentData } from "firebase/firestore";
 import type { AllPostsType } from "@/src/types";
 import type { PostProps } from "../types/components-props";
 
 export default function Post({ idPost }: PostProps) {
     const [formComment, setFormComment] = useState(false);
-    const [comentario, setComentario] = useState<string>('');
-    const [comentarioId, setComentarioId] = useState<string>('');
+    const [commentId, setCommentId] = useState<string>('');
     const [currentPost, setCurrentPost] = useState<AllPostsType | null>(null);
     const [loadingPage, setLoadingPage] = useState(true);
 
@@ -26,65 +25,63 @@ export default function Post({ idPost }: PostProps) {
 
         setCurrentPost(loadingPost ? loadingPost : null);
         setLoadingPage(false);
-    }, [allPosts, idPost])
+    }, [allPosts, idPost]);
 
     useEffect(() => {
         resetFormComment();
-    }, [currentPost])
+    }, [currentPost]);
 
-    const resetFormComment = () => {
+    const resetFormComment = useCallback(() => {
         setFormComment(false);
-        setComentarioId('');
-        setComentario('');
-    }
+        setCommentId('');
+    }, []);
 
-    const addCommentBtn = () => !user ? setFormModal(true) : setFormComment(true);
+    const addCommentBtn = useCallback(() => {
+        !user ? setFormModal(true) : setFormComment(true);
+    }, [user, setFormModal]);
 
-    if(!currentPost && !loadingPage) return <NotFound message="Publicacion no encontrada o eliminada" />
+    const memoizedPost = useMemo(() => {
+        if (currentPost) return <PostComponent postData={currentPost.posts} creator={currentPost.user} />
+    }, [currentPost]);
+
+    if (!currentPost && !loadingPage) return <NotFound message="Post not found or deleted" />;
 
     if (currentPost) return (
         <div className="main-container w-full">
-            <PostComponent
-                postData={currentPost.posts}
-                creador={currentPost.usuario}
-            />
+            {memoizedPost}
 
             <section className="comentarios-section w-full">
-                {!formComment && <button onClick={addCommentBtn} className="btn-add-comment all-center pointer border-color"><span className="all-center">+</span> Añadir comentario</button>}
+                {!formComment && <button onClick={addCommentBtn} className="btn-add-comment all-center pointer border-color"><span className="all-center">+</span> Add comment</button>}
 
                 {formComment && (
                     <FormComment
                         post={currentPost.posts}
-                        comentario={comentario}
-                        setComentario={setComentario}
                         isReplyForm={false}
                         resetFormComment={resetFormComment}
                     />
                 )}
 
                 <div className="comentarios">
-                    {currentPost.posts.comments.map((comentarioPost: DocumentData, indexComment: number) => (
+                    {currentPost.posts.comments.map((commentPost: DocumentData, indexComment: number) => (
                         <CommentsContainer
-                            key={comentarioPost.id}
-                            comentarioDoc={comentarioPost}
-                            setComentarioId={setComentarioId}
+                            key={commentPost.id}
+                            commentDoc={commentPost}
+                            setCommentId={setCommentId}
                             currentPost={currentPost.posts}
                             indexComment={indexComment}
-                            comentario={comentario}
-                            setComentario={setComentario}
-                            comentarioId={comentarioId}
+                            commentId={commentId}
                             resetFormComment={resetFormComment}
                         />
                     ))}
 
                     {currentPost.posts.comments.length === 0 && (
                         <div className="no-comentarios">
-                            <h4>Se la primera persona en comentar</h4>
-                            <p>Di lo que piensas y da inicio a esta conversacion</p>
+                            <h4>Be the first person to comment</h4>
+                            <p>Say what you think and start this conversation.</p>
                         </div>
                     )}
                 </div>
             </section>
         </div>
-    )
+    );
 }

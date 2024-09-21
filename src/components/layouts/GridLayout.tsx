@@ -12,7 +12,7 @@ import FormSesion from "../forms/FormSesion";
 import { Spinner } from "../ui";
  
 export default function GridLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-    const {setNavModal, loading, fetchError} = useContext(GlobalContext);
+    const {setNavModal, loadingData, fetchError} = useContext(GlobalContext);
 
     const path = usePathname();
 
@@ -27,11 +27,11 @@ export default function GridLayout({ children }: Readonly<{ children: React.Reac
             {path === '/' && <ImgHero />}
 
             <main>
-                {loading && <Spinner />}
+                {loadingData && <Spinner />}
 
-                {fetchError && <p>Error en el servidor, recargar la pagina o intentelo mas tarde...</p> }
+                {fetchError && <p>server error, reload the page or try again later...</p> }
 
-                {(!loading && !fetchError) && (
+                {(!loadingData && !fetchError) && (
                     <>
                         {children}
                     </>

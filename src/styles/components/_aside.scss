@@ -54,6 +54,10 @@ aside.left {
             font-weight: 600;
         }
     }
+
+    .skeleton-user {
+        @include userLink-container();
+    }
 }
 
 .nav-modal {
@@ -76,6 +80,12 @@ aside.right {
 }
 
 @media screen and (min-width: 720px) {
+    aside.left {
+        .accordion-populars {
+            display: none;
+        }
+    }
+
     aside.right {
         display: flex;
     }

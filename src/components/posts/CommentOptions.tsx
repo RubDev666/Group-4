@@ -1,5 +1,5 @@
 'use client';
-import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 
 import themeColors from "@/src/utilities/themeColors";
@@ -97,7 +97,7 @@ export default function CommentOptions({deleteF, setEdit}: CommentOptionsProps) 
                             <ListItemIcon>
                                 <Edit className="primary-color" fontSize="small" />
                             </ListItemIcon>
-                            Editar comentario
+                            Edit comment
                         </MenuItem>
 
                         <MenuItem 
@@ -107,7 +107,7 @@ export default function CommentOptions({deleteF, setEdit}: CommentOptionsProps) 
                             <ListItemIcon>
                                 <Delete className="primary-color" fontSize="small" />
                             </ListItemIcon>
-                            Borrar comentario
+                            Delete comment
                         </MenuItem>
                     </Menu>
                 </>
