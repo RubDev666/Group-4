@@ -136,7 +136,7 @@ export default function Comment({commentDoc, setCommentId, currentPost, indexCom
 
     const meoizedHeaderComment = useMemo(() => {
         return (
-            <div className="header-comentario relative flex justify-between">
+            <div className="header-comment relative flex justify-between">
                 <div className='flex info-creator'>
                     <Link href={`/u/${userPost.displayName}`} className="user text-color flex align-center">
                         <AvatarImg
@@ -159,17 +159,17 @@ export default function Comment({commentDoc, setCommentId, currentPost, indexCom
     }, [currentPost, user])
 
     return (
-        <div className="comentario-container relative w-full">
+        <div className="comment-container relative w-full">
             {meoizedHeaderComment}
 
-            <div className={`comentario ${commentDoc.replies.length === 0 && 'unique'}`}>
+            <div className={`comment ${commentDoc.replies.length === 0 && 'unique'}`}>
                 {!edit && <p>{commentDoc.comment}</p>}
 
                 {edit && (
                     <textarea
                         onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setCommentEdit(e.target.value)}
-                        name='edit-comentario'
-                        id='edit-comentario'
+                        name='edit-comment'
+                        id='edit-comment'
                         className="w-full scroll-bar-style"
                         defaultValue={commentDoc.comment}
                     />
@@ -188,7 +188,7 @@ export default function Comment({commentDoc, setCommentId, currentPost, indexCom
                                 <span>{commentDoc.likes.length.toString()}</span>
                             </div>
 
-                            <div className="relative comment all-center pointer bg-hover" onClick={replyBtn}>
+                            <div className="relative all-center pointer bg-hover" onClick={replyBtn}>
                                 <ChatBubbleOutline className='icon' />
 
                                 <span>Reply</span>
@@ -200,7 +200,7 @@ export default function Comment({commentDoc, setCommentId, currentPost, indexCom
                         <>
                             <button className="cancel-btn pointer bg-hover-2" onClick={() => setEdit(false)}>Cancel</button>
 
-                            <button className="comentar-btn pointer" onClick={saveEditComment}>Edit</button>
+                            <button className="comment-btn pointer" onClick={saveEditComment}>Edit</button>
                         </>
                     )}
                 </div>

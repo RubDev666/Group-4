@@ -91,21 +91,21 @@ export default function Post({ postData, creator }: PostComponentProps) {
 
                 <h3>{postData.title}</h3>
 
-                {(path !== '/' && !path.includes('/u/')) && <p className='descripcion'>{postData.description}</p>}
+                {(path !== '/' && !path.includes('/u/')) && <p className='description'>{postData.description}</p>}
 
                 {(!path.includes('/u/') && postData.imgUrl) && (
                     <div className="img-container relative w-full all-center">
                         <Image
                             src={postData.imgUrl}
-                            alt='img-fondo'
+                            alt='bg-img'
                             fill
-                            className='img-fondo absolute'
+                            className='bg-img absolute'
                             priority
                         />
 
                         <Image
                             src={postData.imgUrl}
-                            alt='img-fondo'
+                            alt='bg-img'
                             fill
                             className='img-post h-full absolute'
                             priority

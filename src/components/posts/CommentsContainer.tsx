@@ -29,7 +29,7 @@ export default function CommentsContainer({ commentDoc, setCommentId, currentPos
     }, [currentPost]);
 
     if (userPost) return (
-        <div className="comentario-main-container w-full">
+        <div className="comment-main-container w-full">
             <Comment 
                 userPost={userPost}
                 commentDoc={commentDoc}
@@ -39,7 +39,7 @@ export default function CommentsContainer({ commentDoc, setCommentId, currentPos
             />
 
             {commentId === commentDoc.id && (
-                <div className={`formulario-container w-full ${commentDoc.replies.length > 0 && 'reply-true'}`}>
+                <div className={`form-container-2 w-full ${commentDoc.replies.length > 0 && 'reply-true'}`}>
                     <FormComment
                         post={currentPost}
                         commentId={commentId}

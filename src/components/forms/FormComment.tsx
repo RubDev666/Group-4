@@ -74,7 +74,7 @@ export default function FormComment({ post, isReplyForm, indexComment, resetForm
             <div className="actions-form-container w-full flex align-center">
                 <button className="cancel-btn pointer bg-hover-2" type="reset" onClick={cancel}>Cancel</button>
 
-                <button className="comentar-btn pointer" type="submit">{`${isReplyForm ? 'Reply' : 'Comment'}`}</button>
+                <button className="comment-btn pointer" type="submit">{`${isReplyForm ? 'Reply' : 'Comment'}`}</button>
             </div>
         </form>
     )

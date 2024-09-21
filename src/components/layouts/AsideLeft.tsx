@@ -70,7 +70,7 @@ export default function AsideLeft() {
                             expandIcon={<ExpandMore className='icon-expanded' />}
                             aria-controls="panel1-content"
                             id="panel1-header"
-                            className="titulo-acordeon"
+                            className="accordion-title"
                         >
                             Recent
                         </AccordionSummary>
@@ -105,7 +105,7 @@ export default function AsideLeft() {
                     expandIcon={<ExpandMore className='icon-expanded' />}
                     aria-controls="panel1-content"
                     id="panel1-header"
-                    className="titulo-acordeon"
+                    className="accordion-title"
                 >
                     Topics
                 </AccordionSummary>
@@ -136,7 +136,7 @@ export default function AsideLeft() {
                     expandIcon={<ExpandMore className='icon-expanded' />}
                     aria-controls="panel1-content"
                     id="panel1-header"
-                    className="titulo-acordeon"
+                    className="accordion-title"
                 >
                     Resources
                 </AccordionSummary>

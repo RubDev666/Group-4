@@ -23,7 +23,7 @@ export default function AccordionPopulars() {
                 expandIcon={<ExpandMore className='icon-expanded' />}
                 aria-controls="panel1-content"
                 id="panel1-header"
-                className="titulo-acordeon"
+                className="accordion-title"
             >
                 popular users
             </AccordionSummary>

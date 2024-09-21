@@ -5,7 +5,7 @@
     padding: 7px 20px;
 }
 
-/*------- estilos globales para ambos aside ----- */
+/*------- global styles for both asides ----- */
 aside {
     width: 250px;
     height: calc(100vh - 60px);
@@ -15,7 +15,7 @@ aside {
     flex-direction: column;
     overflow-y: scroll;
 
-    .titulo-acordeon {
+    .accordion-title {
         letter-spacing: 5px;
         text-transform: uppercase;
     }

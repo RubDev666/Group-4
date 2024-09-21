@@ -142,7 +142,7 @@ export default function Reply({ reply, currentPost, indexComment, indexReply }: 
 
     const memoizedHeaderReply = useMemo(() => {
         if (userReply) return (
-            <div className="header-comentario relative flex justify-between w-full">
+            <div className="header-comment relative flex justify-between w-full">
                 <div className='flex info-creator'>
                     <Link href={`/u/${userReply.displayName}`} className="user text-color flex align-center">
                         <AvatarImg
@@ -165,20 +165,20 @@ export default function Reply({ reply, currentPost, indexComment, indexReply }: 
     }, [user, currentPost, userReply])
 
     if (userReply) return (
-        <div className="respuesta-main-container relative flex">
-            <div className="linea"></div>
+        <div className="reply-main-container relative flex">
+            <div className="line"></div>
 
-            <div className="respuesta-container w-full">
+            <div className="reply-container w-full">
                 {memoizedHeaderReply}
 
-                <div className="respuesta">
+                <div className="reply">
                     {!edit && <p>{reply.comment}</p>}
 
                     {edit && (
                         <textarea
                             onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setCommentEdit(e.target.value)}
-                            name='edit-respuesta'
-                            id='edit-respuesta'
+                            name='edit-reply'
+                            id='edit-reply'
                             className="w-full scroll-bar-style"
                             defaultValue={reply.comment}
                         />
@@ -201,7 +201,7 @@ export default function Reply({ reply, currentPost, indexComment, indexReply }: 
                             <>
                                 <button className="cancel-btn pointer bg-hover-2" onClick={() => setEdit(false)}>Cancel</button>
 
-                                <button className="comentar-btn pointer" onClick={saveEditComment}>Edit</button>
+                                <button className="comment-btn pointer" onClick={saveEditComment}>Edit</button>
                             </>
                         )}
                     </div>

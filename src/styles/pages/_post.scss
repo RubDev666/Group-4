@@ -20,10 +20,10 @@
     padding: 10px 20px;
 }
 
-/*La imagen del perfil tiene 30*30px */
+/*profile img is 30*30px */
 $img-half-size: 15px;
 
-.comentarios-section {
+.comments-section {
     margin: 20px 0 40px;
 
     *padding: 0 15px;
@@ -74,13 +74,13 @@ $img-half-size: 15px;
                 margin-right: 15px
             }
 
-            .comentar-btn {
+            .comment-btn {
                 @include mixin.btnPrimary();
             }
         }
     }
 
-    .formulario-container {
+    .form-container-2 {
         border-left: 1px solid transparent;
         margin-left: $img-half-size;
         padding: 20px 15px 20px ($img-half-size * 2);
@@ -94,8 +94,8 @@ $img-half-size: 15px;
         }
     }
 
-    .comentarios {
-        .no-comentarios {
+    .comments {
+        .no-comments {
             text-align: center;
 
             h4 {
@@ -111,13 +111,13 @@ $img-half-size: 15px;
             }
         }
 
-        .comentario-main-container {
+        .comment-main-container {
             margin-bottom: 30px;
             overflow: hidden;
 
-            .comentario-container,
-            .respuesta-main-container {
-                .header-comentario {
+            .comment-container,
+            .reply-main-container {
+                .header-comment {
                     align-items: flex-start;
 
                     .info-creator {
@@ -127,8 +127,8 @@ $img-half-size: 15px;
                     }
                 }
 
-                .respuesta,
-                .comentario {
+                .reply,
+                .comment {
                     overflow: hidden;
 
                     p {
@@ -173,15 +173,15 @@ $img-half-size: 15px;
                         border-radius: 20px;
                     }
         
-                    .comentar-btn {
+                    .comment-btn {
                         @include mixin.btnPrimary();
                     }   
                 }
 
             }
 
-            .comentario-container {
-                .comentario {
+            .comment-container {
+                .comment {
                     padding: 15px 0 0 ($img-half-size * 2);
                     margin-left: $img-half-size;
                     border-left: 1px solid color.$border-color-container;
@@ -192,7 +192,7 @@ $img-half-size: 15px;
                 }
             }
 
-            .respuesta-main-container {
+            .reply-main-container {
                 $top-padding: 20px;
 
                 margin-left: $img-half-size;
@@ -200,7 +200,7 @@ $img-half-size: 15px;
                 padding-top: $top-padding;
                 padding-left: calc($img-half-size * 2);
 
-                .linea {
+                .line {
                     position: absolute;
                     left: -1px;
                     top: 0;
@@ -211,8 +211,8 @@ $img-half-size: 15px;
                     border-bottom-left-radius: 20px;
                 }
 
-                .respuesta-container {
-                    .respuesta {
+                .reply-container {
+                    .reply {
                         padding: 15px 0 0 ($img-half-size * 1.5);
                     }
                 }
@@ -226,12 +226,12 @@ $img-half-size: 15px;
 }
 
 @media screen and (min-width: 480px) {
-    .comentarios-section {
-        .comentarios {
-            .comentario-main-container {
-                .comentario-container,
-                .respuesta-main-container {
-                    .header-comentario {
+    .comments-section {
+        .comments {
+            .comment-main-container {
+                .comment-container,
+                .reply-main-container {
+                    .header-comment {
                         .info-creator {
                             align-items: center;
                             flex-direction: row;
@@ -244,7 +244,7 @@ $img-half-size: 15px;
 }
 
 @media screen and (min-width: 720px) {
-    .comentarios-section {
+    .comments-section {
         form {
             .actions-form-container {
                 button {
@@ -253,13 +253,13 @@ $img-half-size: 15px;
             }
         }
 
-        .comentarios {
-            .comentario-main-container {
+        .comments {
+            .comment-main-container {
                 margin-bottom: 30px;
                 overflow: hidden;
     
-                .comentario-container,
-                .respuesta-main-container {
+                .comment-container,
+                .reply-main-container {
                     .actions-container {
                         button {
                             padding: 8px 20px;

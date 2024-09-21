@@ -28,7 +28,7 @@ article {
         font-weight: 500;
     }
 
-    .descripcion {
+    .description {
         font-size: .9em;
         font-weight: 300;
     }
@@ -40,7 +40,7 @@ article {
         overflow: hidden;
         border-radius: 7px;
 
-        .img-fondo {
+        .bg-img {
             object-fit: cover;
             filter: blur(5px);
             transform: scale(1.4);

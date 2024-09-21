@@ -50,7 +50,7 @@ export default function Post({ idPost }: PostProps) {
         <div className="main-container w-full">
             {memoizedPost}
 
-            <section className="comentarios-section w-full">
+            <section className="comments-section w-full">
                 {!formComment && <button onClick={addCommentBtn} className="btn-add-comment all-center pointer border-color"><span className="all-center">+</span> Add comment</button>}
 
                 {formComment && (
@@ -61,7 +61,7 @@ export default function Post({ idPost }: PostProps) {
                     />
                 )}
 
-                <div className="comentarios">
+                <div className="comments">
                     {currentPost.posts.comments.map((commentPost: DocumentData, indexComment: number) => (
                         <CommentsContainer
                             key={commentPost.id}
@@ -75,7 +75,7 @@ export default function Post({ idPost }: PostProps) {
                     ))}
 
                     {currentPost.posts.comments.length === 0 && (
-                        <div className="no-comentarios">
+                        <div className="no-comments">
                             <h4>Be the first person to comment</h4>
                             <p>Say what you think and start this conversation.</p>
                         </div>
