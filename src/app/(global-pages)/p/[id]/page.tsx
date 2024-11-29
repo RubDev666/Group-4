@@ -9,7 +9,8 @@ export async function generateMetadata(
     { params, searchParams }: DynamicParams,
     parent: ResolvingMetadata
 ): Promise<Metadata> {
-    const post = await firebase.getData('posts', params.id);
+    const { id } = await params;
+    const post = await firebase.getData('posts', id);
 
     if(!post) return {title: 'Post Not Found'}
 
@@ -18,6 +19,8 @@ export async function generateMetadata(
     }
 }
 
-export default function Page({ params }: Params) {
-    return <Post idPost={params.id} />
+export default async function Page({ params }: Params) {
+    const { id } = await params;
+
+    return <Post idPost={id} />
 }
