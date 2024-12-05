@@ -42,3 +42,5 @@ export function getRandomColor(): string {
 
 export const CONECTION_ERROR_MESSAGE = 'Connection failed, try again later*';
 export const USERNAME_EXIST_ERROR_MESSAGE = 'User name already exists*';
+
+export const handleLikes = (currentLikes: string[], newUID: string) => currentLikes.includes(newUID) ? currentLikes.filter(currentUID => currentUID !== newUID) : [newUID, ...currentLikes];

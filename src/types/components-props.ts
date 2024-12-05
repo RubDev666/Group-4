@@ -14,7 +14,6 @@ export type FormCommentProps = {
     post: DocumentData;
     isReplyForm: boolean;
     commentId?: string;
-    indexComment?: number;
     resetFormComment: () => void;
 }
 
@@ -37,10 +36,9 @@ export type CommentsContainerProps = Pick<FormCommentProps, 'commentId' | 'reset
     commentDoc: DocumentData;
     setCommentId: Dispatch<SetStateAction<string>>;
     currentPost: DocumentData;
-    indexComment: number;
 }
 
-export type CommentProps = Pick<CommentsContainerProps, 'commentDoc' | 'setCommentId' | 'currentPost' | 'indexComment'> & {
+export type CommentProps = Pick<CommentsContainerProps, 'commentDoc' | 'setCommentId' | 'currentPost'> & {
     userPost: DocumentData;
 }
 
@@ -57,8 +55,7 @@ export type PostComponentProps = {
 export type ReplyProps = {
     reply: DocumentData;
     currentPost: DocumentData;
-    indexComment: number;
-    indexReply: number;
+    commentId: string;
 }
 
 //================ COMPONENTS > ui =========

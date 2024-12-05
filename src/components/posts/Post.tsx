@@ -17,6 +17,7 @@ import PostOptions from './PostOptions';
 import { GlobalContext } from "@/src/app/providers";
 
 import type { PostComponentProps } from '@/src/types/components-props';
+import { handleLikes } from '@/src/firebase/utils';
 
 export default function Post({ postData, creator }: PostComponentProps) {
     const path = usePathname();
@@ -29,33 +30,53 @@ export default function Post({ postData, creator }: PostComponentProps) {
     const likeToggle = async () => {
         if (!user) return setFormModal(true);
 
-        const currentPosts = [...allPosts];
-
-        let newPost = JSON.parse(JSON.stringify(postData));
-
-        let currentLikes: string[] = JSON.parse(JSON.stringify(postData.likes));
-
-        newPost.likes = currentLikes.includes(user.uid) ? currentLikes.filter(uid => uid !== user.uid) : [user.uid, ...currentLikes];
-
-        const updatePosts = allPosts.map(data => data.posts.id === postData.id ? { ...data, posts: newPost } : data);
+        const {updatePosts, currentPosts} = update_state(user.uid);
 
         try {
             setAllPosts(updatePosts);
 
             if (user.uid !== postData.idUser) await firebase.handleRecentActivity(user.uid, postData.idUser);
 
-            await firebase.updatePost({
-                idPost: postData.id,
-                idCreator: postData.idUser,
-                currentData: currentLikes.length,
-                key: 'likes',
-                newData: newPost.likes
-            });
+            await update_db(user.uid);
         } catch (error) {
             console.log(error);
 
             setAllPosts(currentPosts);
         }
+    }
+
+    //Modify data only for the state
+    const update_state = (uid: string) => {
+        const currentPosts = [...allPosts];
+
+        const currentPost_state = JSON.parse(JSON.stringify(postData));
+
+        const currentLikes_state: string[] = JSON.parse(JSON.stringify(postData.likes));
+        currentPost_state.likes = handleLikes(currentLikes_state, uid);
+
+        const updatePosts = allPosts.map(data => data.posts.id === postData.id ? { ...data, posts: currentPost_state } : data);
+
+        return {
+            currentPosts,
+            updatePosts
+        }
+    }
+
+    //modify data only for the db
+    const update_db = async (uid: string) => {
+        const currentPost_db = await firebase.getData('posts', postData.id);
+
+        if(!currentPost_db) return;
+
+        const currentLikes_db = handleLikes(currentPost_db.likes, uid);
+
+        await firebase.updatePost({
+            idPost: postData.id,
+            idCreator: postData.idUser,
+            currentData: currentPost_db.likes.length,
+            key: 'likes',
+            newData: currentLikes_db
+        });
     }
 
     const redirectPost = () => {

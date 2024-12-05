@@ -11,7 +11,7 @@ import { Reply, Comment } from "@/src/components/posts";
 
 import type { CommentsContainerProps } from "@/src/types/components-props";
 
-export default function CommentsContainer({ commentDoc, setCommentId, currentPost, indexComment, commentId, resetFormComment}: CommentsContainerProps) {
+export default function CommentsContainer({ commentDoc, setCommentId, currentPost, commentId, resetFormComment}: CommentsContainerProps) {
     const { allUsers } = useContext(GlobalContext);
 
     const [userPost, setUserPost] = useState<DocumentData | undefined>(undefined);
@@ -25,7 +25,7 @@ export default function CommentsContainer({ commentDoc, setCommentId, currentPos
     }, [allUsers, commentDoc])
 
     const memoizedReplies = useMemo(() => {
-        return commentDoc.replies.length > 0 && commentDoc.replies.map((res: DocumentData, indexReply: number) => <Reply key={res.id} reply={res} currentPost={currentPost} indexComment={indexComment} indexReply={indexReply} />)
+        return commentDoc.replies.length > 0 && commentDoc.replies.map((res: DocumentData) => <Reply key={res.id} reply={res} currentPost={currentPost} commentId={commentDoc.id} />)
     }, [currentPost]);
 
     if (userPost) return (
@@ -35,7 +35,6 @@ export default function CommentsContainer({ commentDoc, setCommentId, currentPos
                 commentDoc={commentDoc}
                 setCommentId={setCommentId}
                 currentPost={currentPost}
-                indexComment={indexComment}
             />
 
             {commentId === commentDoc.id && (
@@ -44,7 +43,6 @@ export default function CommentsContainer({ commentDoc, setCommentId, currentPos
                         post={currentPost}
                         commentId={commentId}
                         isReplyForm={true}
-                        indexComment={indexComment}
                         resetFormComment={resetFormComment}
                     />
                 </div>

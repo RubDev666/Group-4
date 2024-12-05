@@ -11,7 +11,7 @@ import type { FormCommentProps } from "@/src/types/components-props";
 
 import { GlobalContext } from "@/src/app/providers";
 
-export default function FormComment({ post, isReplyForm, indexComment, resetFormComment }: FormCommentProps) {
+export default function FormComment({ post, isReplyForm, resetFormComment, commentId }: FormCommentProps) {
     const [comment, setComment] = useState<string>('');
 
     const {user, setAllPosts, allPosts} = useContext(GlobalContext);
@@ -31,26 +31,62 @@ export default function FormComment({ post, isReplyForm, indexComment, resetForm
                 likes: [],
                 comment: comment,
             }
+            
+            const {updatePosts} = update_state(newComment);
 
-            let currentComments: CommentTypes[] = JSON.parse(JSON.stringify(post.comments));
-
-            if(!isReplyForm) {
-                newComment = {...newComment, replies: []};
-
-                currentComments = [newComment, ...currentComments];
-            }
-
-            if(isReplyForm && indexComment !== undefined) currentComments[indexComment].replies = [newComment, ...currentComments[indexComment].replies]; 
-
-            await firebase.updatePost({ idPost: post.id, key: 'comments', newData: currentComments});
-
-            const updatePosts = allPosts.map(data => data.posts.id === post.id ? { ...data, posts: { ...data.posts, comments: currentComments } } : data );
+            await update_db(newComment);
 
             setAllPosts(updatePosts);
             setComment('');
         } catch (error) {
             console.log(error);
         }
+    }
+
+    const update_post = (newComment: CommentTypes | ReplyTypes, currentComments: CommentTypes[]) => {
+        if(!isReplyForm) {
+            newComment = {...newComment, replies: []};
+
+            currentComments = [newComment, ...currentComments];
+
+            return currentComments;
+        }
+
+        if(!commentId) return currentComments;
+
+        const currentIndexComment = currentComments.findIndex(comment => comment.id === commentId);
+
+        if(isReplyForm && currentIndexComment !== -1) {
+            currentComments[currentIndexComment].replies = [newComment, ...currentComments[currentIndexComment].replies]; 
+        } else if(isReplyForm && currentIndexComment === -1) {
+            throw new Error('no comment...')
+        }
+
+        return currentComments;
+    }
+
+    const update_state = (newComment: CommentTypes | ReplyTypes) => {
+        let currentComments_state: CommentTypes[] = JSON.parse(JSON.stringify(post.comments));
+
+        const newComments = update_post(newComment, currentComments_state);
+
+        const updatePosts = allPosts.map(data => data.posts.id === post.id ? { ...data, posts: { ...data.posts, comments: newComments} } : data );
+
+        return {
+            updatePosts
+        }
+    }
+
+    const update_db = async (newComment: CommentTypes | ReplyTypes) => {
+        const currentPost_db = await firebase.getData('posts', post.id);
+
+        if(!currentPost_db) return;
+
+        let currentComments_db = currentPost_db.comments;
+
+        const newComments = update_post(newComment, currentComments_db);
+        
+        await firebase.updatePost({ idPost: post.id, key: 'comments', newData: newComments});
     }
 
     const cancel = () => {

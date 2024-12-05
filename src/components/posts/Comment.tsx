@@ -16,8 +16,10 @@ import CommentOptions from "./CommentOptions";
 
 import type { CommentProps } from "@/src/types/components-props";
 import type { DocumentData } from "firebase/firestore";
+import { CommentActions } from "@/src/types/components-functions";
+import { handleLikes } from "@/src/firebase/utils";
 
-export default function Comment({commentDoc, setCommentId, currentPost, indexComment, userPost}: CommentProps) {
+export default function Comment({commentDoc, setCommentId, currentPost, userPost}: CommentProps) {
     const [edit, setEdit] = useState(false);
     const [commentEdit, setCommentEdit] = useState<string>(commentDoc.comment);
 
@@ -26,18 +28,14 @@ export default function Comment({commentDoc, setCommentId, currentPost, indexCom
     const likeToggle = async () => {
         if (!user) return setFormModal(true);
 
-        const {updatePosts, currentPosts, newPost} = handleCurrentData('like');
+        const {updatePosts, currentPosts} = update_state('like', user.uid);
 
         try {
             setAllPosts(updatePosts);
 
             if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
-            await firebase.updatePost({
-                idPost: currentPost.id,
-                key: 'comments',
-                newData: newPost.comments
-            });
+            await update_db('like', user.uid);
         } catch (error) {
             console.log(error);
 
@@ -49,18 +47,14 @@ export default function Comment({commentDoc, setCommentId, currentPost, indexCom
         if(commentEdit === commentDoc.comment) return setEdit(false);
         if(!user || commentEdit === '') return;
 
-        const {updatePosts, currentPosts, newPost} = handleCurrentData('editComment');
+        const {updatePosts, currentPosts} = update_state('edit', user.uid);
         
         try {
             setAllPosts(updatePosts);
             
             if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
-            await firebase.updatePost({
-                idPost: currentPost.id,
-                key: 'comments',
-                newData: newPost.comments
-            });
+            await update_db('edit', user.uid);
 
             setEdit(false);
         } catch (error) {
@@ -71,14 +65,12 @@ export default function Comment({commentDoc, setCommentId, currentPost, indexCom
     }
 
     const deleteComm = async () => {
-        const {updatePosts, currentPosts, newPost} = handleCurrentData('deleteComment');
+        if(!user) return;
+
+        const {updatePosts, currentPosts} = update_state('delete', user.uid);
 
         try {
-            await firebase.updatePost({
-                idPost: currentPost.id,
-                key: 'comments',
-                newData: newPost.comments
-            });
+            await update_db('delete', user.uid);
 
             setAllPosts(updatePosts);
         } catch (error) {
@@ -88,44 +80,61 @@ export default function Comment({commentDoc, setCommentId, currentPost, indexCom
         }
     }
 
-    const handleCurrentData = (type: 'like' | 'deleteComment' | 'editComment') => {
-        const currentPosts = [...allPosts];
+    const update_post = (type: CommentActions, post: DocumentData, uid: string) => {
+        const currentIndexComment = post.comments.findIndex((currentComment: any) => currentComment.id === commentDoc.id);
 
-        let newPost = JSON.parse(JSON.stringify(currentPost));
+        if (currentIndexComment === -1) throw new Error('this comment does not exist...');
 
         switch (type) {
             case 'like': {
-                if(user) {
-                    let currentLikes: string[] = JSON.parse(JSON.stringify(commentDoc.likes));
+                let currentLikes: string[] = post.comments[currentIndexComment].likes;
 
-                    newPost.comments[indexComment].likes = currentLikes.includes(user.uid) ? currentLikes.filter(uid => uid !== user.uid) : [user.uid, ...currentLikes];
-                }
+                post.comments[currentIndexComment].likes = handleLikes(currentLikes, uid);
+                
+                break;
+            }
+            case 'edit': {
+                post.comments[currentIndexComment].comment = commentEdit;
 
                 break;
             }
-            case 'editComment': {
-                newPost.comments[indexComment].comment = commentEdit;
-
-                break;
-            }
-            case 'deleteComment': {
-                let currentComments = JSON.parse(JSON.stringify(currentPost.comments));
-
-                newPost.comments = currentComments.filter((com: DocumentData) => com.id !== commentDoc.id);   
+            case 'delete': {
+                post.comments = post.comments.filter((currentComment: DocumentData) => currentComment.id !== commentDoc.id);  
 
                 break;
             }
 
             default: break;
         }
+    }
+
+    const update_state = (type: CommentActions, uid: string) => {
+        const currentPosts = [...allPosts];
+
+        let newPost = JSON.parse(JSON.stringify(currentPost));
+
+        update_post(type, newPost, uid);
 
         const updatePosts = allPosts.map(data => data.posts.id === currentPost.id ? { ...data, posts: newPost } : data);
 
         return {
             currentPosts,
-            updatePosts,
-            newPost
+            updatePosts
         }
+    }
+
+    const update_db = async (type: CommentActions, uid: string) => {
+        const currentPost_db = await firebase.getData('posts', currentPost.id);
+
+        if(!currentPost_db) return;
+
+        update_post(type, currentPost_db, uid);
+
+        await firebase.updatePost({
+            idPost: currentPost.id,
+            key: 'comments',
+            newData: currentPost_db.comments 
+        })
     }
 
     const replyBtn = () => {

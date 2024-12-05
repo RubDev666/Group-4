@@ -62,13 +62,12 @@ export default function Post({ idPost }: PostProps) {
                 )}
 
                 <div className="comments">
-                    {currentPost.posts.comments.map((commentPost: DocumentData, indexComment: number) => (
+                    {currentPost.posts.comments.map((commentPost: DocumentData) => (
                         <CommentsContainer
                             key={commentPost.id}
                             commentDoc={commentPost}
                             setCommentId={setCommentId}
                             currentPost={currentPost.posts}
-                            indexComment={indexComment}
                             commentId={commentId}
                             resetFormComment={resetFormComment}
                         />

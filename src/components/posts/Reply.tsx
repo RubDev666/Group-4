@@ -16,8 +16,10 @@ import firebase from "@/src/firebase/firebase";
 import CommentOptions from "./CommentOptions";
 
 import type { ReplyProps } from "@/src/types/components-props";
+import { handleLikes } from "@/src/firebase/utils";
+import type { CommentActions } from "@/src/types/components-functions";
 
-export default function Reply({ reply, currentPost, indexComment, indexReply }: ReplyProps) {
+export default function Reply({ reply, currentPost, commentId }: ReplyProps) {
     const [edit, setEdit] = useState(false);
     const [commentEdit, setCommentEdit] = useState<string>(reply.comment);
     const [userReply, setUserReply] = useState<DocumentData | undefined>(undefined);
@@ -35,18 +37,14 @@ export default function Reply({ reply, currentPost, indexComment, indexReply }: 
     const likeToggle = async () => {
         if (!user) return setFormModal(true);
 
-        const {updatePosts, newPost, currentPosts} = handleCurrentData('like');
+        const {updatePosts, currentPosts} = update_state('like', user.uid);
 
         try {
             setAllPosts(updatePosts);
 
             if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
-            await firebase.updatePost({
-                idPost: currentPost.id,
-                key: 'comments',
-                newData: newPost.comments 
-            })
+            await update_db('like', user.uid);
         } catch (error) {
             console.log(error);
 
@@ -59,18 +57,14 @@ export default function Reply({ reply, currentPost, indexComment, indexReply }: 
 
         if(!user || commentEdit === '') return;
 
-        const {updatePosts, currentPosts, newPost} = handleCurrentData('editComment');
+        const {updatePosts, currentPosts} = update_state('edit', user.uid);
 
         try {
             setAllPosts(updatePosts);
 
             if (user.uid !== currentPost.idUser) await firebase.handleRecentActivity(user.uid, currentPost.idUser);
 
-            await firebase.updatePost({
-                idPost: currentPost.id,
-                key: 'comments',
-                newData: newPost.comments
-            });
+            await update_db('edit', user.uid);
 
             setEdit(false);
         } catch (error) {
@@ -81,14 +75,12 @@ export default function Reply({ reply, currentPost, indexComment, indexReply }: 
     }
 
     const deleteComm = async () => {
-        const {updatePosts, newPost, currentPosts} = handleCurrentData('deleteComment');
+        if(!user) return;
+
+        const {updatePosts, currentPosts} = update_state('delete', user.uid);
 
         try {
-            await firebase.updatePost({
-                idPost: currentPost.id,
-                key: 'comments',
-                newData: newPost.comments
-            });
+            await update_db('delete', user.uid);
 
             setAllPosts(updatePosts);
 
@@ -100,43 +92,61 @@ export default function Reply({ reply, currentPost, indexComment, indexReply }: 
         }
     }
 
-    const handleCurrentData = (type: 'like' | 'deleteComment' | 'editComment') => {
+    const update_state = (type: CommentActions, uid: string) => {        
         const currentPosts = [...allPosts];
 
-        let newPost = JSON.parse(JSON.stringify(currentPost));
+        let currentPost_state = JSON.parse(JSON.stringify(currentPost));
+
+        update_post(type, uid, currentPost_state);
+
+        const updatePosts = allPosts.map(data => data.posts.id === currentPost.id ? { ...data, posts: currentPost_state } : data);
+
+        return {
+            currentPosts,
+            updatePosts,
+        }
+    }
+
+    const update_db = async (type: CommentActions, uid: string) => {
+        const currentPost_db = await firebase.getData('posts', currentPost.id);
+
+        if(!currentPost_db) return;
+
+        update_post(type, uid, currentPost_db);
+
+        await firebase.updatePost({
+            idPost: currentPost.id,
+            key: 'comments',
+            newData: currentPost_db.comments 
+        })
+    }
+
+    const update_post = (type: CommentActions, uid: string, post: DocumentData) => {
+        const commentIndex = post.comments.findIndex((currentComment: any) => currentComment.id === commentId);
+        const replyIndex = post.comments[commentIndex].replies.findIndex((currentReply: any) => currentReply.id === reply.id);
+
+        if(replyIndex === -1 || commentIndex === -1) throw new Error('this reply does not exist...');
 
         switch (type) {
             case 'like': {
-                if(user) {
-                    let currentLikes: string[] = JSON.parse(JSON.stringify(reply.likes));
+                const currentLikes_db = post.comments[commentIndex].replies[replyIndex].likes;
 
-                    newPost.comments[indexComment].replies[indexReply].likes = currentLikes.includes(user.uid) ? currentLikes.filter(uid => uid !== user.uid) : [user.uid, ...currentLikes];
-                }
+                post.comments[commentIndex].replies[replyIndex].likes = handleLikes(currentLikes_db, uid);
 
                 break;
             }
-            case 'editComment': {
-                newPost.comments[indexComment].replies[indexReply].comment = commentEdit;
+            case 'edit': {
+                post.comments[commentIndex].replies[replyIndex].comment = commentEdit;
 
                 break;
             }
-            case 'deleteComment': {
-                let currentComments = JSON.parse(JSON.stringify(currentPost.comments));
-
-                newPost.comments[indexComment].replies = currentComments[indexComment].replies.filter((com: DocumentData) => com.id !== reply.id);   
+            case 'delete': {
+                post.comments[commentIndex].replies = post.comments[commentIndex].replies.filter((com: DocumentData) => com.id !== reply.id);
 
                 break;
             }
 
             default: break;
-        }
-
-        const updatePosts = allPosts.map(data => data.posts.id === currentPost.id ? { ...data, posts: newPost } : data);
-
-        return {
-            currentPosts,
-            updatePosts,
-            newPost
         }
     }
 
