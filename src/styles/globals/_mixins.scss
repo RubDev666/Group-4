@@ -51,9 +51,11 @@
         @media screen and (min-width: 480px) {
             margin: 0 0 0 20px;
         }
-
-        font-size: $time-size;
-        font-weight: 400;
+        
+        & {
+            font-weight: 400;
+            font-size: $time-size;
+        }
 
         &::before {
             content: '';

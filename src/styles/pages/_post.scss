@@ -23,6 +23,8 @@
 /*profile img is 30*30px */
 $img-half-size: 15px;
 
+$replies-line-size: 2px;
+
 .comments-section {
     margin: 20px 0 40px;
 
@@ -184,10 +186,10 @@ $img-half-size: 15px;
                 .comment {
                     padding: 15px 0 0 ($img-half-size * 2);
                     margin-left: $img-half-size;
-                    border-left: 1px solid color.$border-color-container;
+                    border-left: $replies-line-size solid color.$border-color-container;
 
                     &.unique {
-                        border-left: 1px solid transparent;
+                        border-left: $replies-line-size solid transparent;
                     }
                 }
             }
@@ -196,18 +198,13 @@ $img-half-size: 15px;
                 $top-padding: 20px;
 
                 margin-left: $img-half-size;
-                border-left: 1px solid color.$border-color-container;
                 padding-top: $top-padding;
-                padding-left: calc($img-half-size * 2);
 
                 .line {
-                    position: absolute;
-                    left: -1px;
-                    top: 0;
                     width: calc($img-half-size * 2);
-                    height: calc($img-half-size + $top-padding);
-                    border-left: 1px solid color.$border-color-container;
-                    border-bottom: 1px solid color.$border-color-container;
+                    height: calc($img-half-size);
+                    border-left: $replies-line-size solid color.$border-color-container;
+                    border-bottom: $replies-line-size solid color.$border-color-container;
                     border-bottom-left-radius: 20px;
                 }
 
@@ -217,8 +214,17 @@ $img-half-size: 15px;
                     }
                 }
 
-                &:last-child {
-                    border-left: 1px solid transparent;
+                &::before {
+                    content: '';
+                    width: $img-half-size;
+                    height: calc(100% + $top-padding);
+                    border-left: $replies-line-size solid color.$border-color-container;
+                    position: absolute;
+                    top: 0
+                }
+
+                &:last-child::before {
+                    height: $top-padding;
                 }
             }
         }
